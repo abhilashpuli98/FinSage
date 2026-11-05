@@ -3,7 +3,7 @@
 import unittest
 from datetime import datetime, timezone
 
-from quantmind.preprocess.fetch._types import Fetched, RawPaper
+from finsage.preprocess.fetch._types import Fetched, RawPaper
 
 
 class FetchedTests(unittest.TestCase):

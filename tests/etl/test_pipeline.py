@@ -8,8 +8,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-import quantmind.etl._record as record_module
-from quantmind.etl import ETLPipeline, PipelineContext
+import finsage.etl._record as record_module
+from finsage.etl import ETLPipeline, PipelineContext
 
 
 def _read_json(path: Path) -> dict[str, object]:
@@ -74,7 +74,7 @@ class PipelineRunTests(unittest.IsolatedAsyncioTestCase):
         )
 
         snapshot = _read_json(run.status_file)
-        self.assertEqual(snapshot["schema"], "quantmind.etl.run/v1")
+        self.assertEqual(snapshot["schema"], "finsage.etl.run/v1")
         self.assertTrue(snapshot["dry_run"])
         self.assertTrue(run.status_file.is_absolute())
         self.assertEqual(snapshot["state"], "created")
@@ -152,12 +152,12 @@ class PipelineRunTests(unittest.IsolatedAsyncioTestCase):
         await run.execute()
 
         snapshot = _read_json(run.status_file)
-        self.assertEqual(snapshot["schema"], "quantmind.etl.run/v1")
+        self.assertEqual(snapshot["schema"], "finsage.etl.run/v1")
         self.assertTrue(snapshot["dry_run"])
         events = _read_events(run.events_file)
         self.assertGreater(len(events), 0)
         for event in events:
-            self.assertEqual(event["schema"], "quantmind.etl.event/v1")
+            self.assertEqual(event["schema"], "finsage.etl.event/v1")
             self.assertEqual(event["run_id"], run.id)
             self.assertTrue(event["dry_run"])
 
@@ -211,7 +211,7 @@ class PipelineRunTests(unittest.IsolatedAsyncioTestCase):
     async def test_json_records_escape_surrogate_strings_recursively(
         self,
     ) -> None:
-        unsafe = os.fsdecode(b"\xff")
+        unsafe = chr(0xDCFF)
         safe = _json_safe_text(unsafe)
 
         async def load(value: str, *, ctx: PipelineContext) -> str:
@@ -251,7 +251,7 @@ class PipelineRunTests(unittest.IsolatedAsyncioTestCase):
     async def test_failure_after_surrogate_progress_records_failed_json(
         self,
     ) -> None:
-        unsafe = os.fsdecode(b"\xff")
+        unsafe = chr(0xDCFF)
         safe = _json_safe_text(unsafe)
 
         async def transform(value: str, *, ctx: PipelineContext) -> str:
@@ -381,7 +381,7 @@ class PipelineRunTests(unittest.IsolatedAsyncioTestCase):
         )
 
         with patch(
-            "quantmind.etl._record._append_json_line",
+            "finsage.etl._record._append_json_line",
             side_effect=append_event,
         ):
             with self.assertRaisesRegex(LookupError, "stage failed"):
@@ -409,7 +409,7 @@ class PipelineRunTests(unittest.IsolatedAsyncioTestCase):
         )
 
         with patch(
-            "quantmind.etl._record._append_json_line",
+            "finsage.etl._record._append_json_line",
             side_effect=append_event,
         ):
             with self.assertRaisesRegex(LookupError, "stage failed"):
@@ -439,7 +439,7 @@ class PipelineRunTests(unittest.IsolatedAsyncioTestCase):
         )
 
         with patch(
-            "quantmind.etl._record._write_json_atomic",
+            "finsage.etl._record._write_json_atomic",
             side_effect=write_snapshot,
         ):
             with self.assertRaises(LookupError) as raised:
@@ -476,11 +476,11 @@ class PipelineRunTests(unittest.IsolatedAsyncioTestCase):
 
         with (
             patch(
-                "quantmind.etl._record._append_json_line",
+                "finsage.etl._record._append_json_line",
                 side_effect=append_event,
             ),
             patch(
-                "quantmind.etl._record._monotonic_seconds",
+                "finsage.etl._record._monotonic_seconds",
                 side_effect=[10.0, 10.1],
             ),
         ):
@@ -515,7 +515,7 @@ class PipelineRunTests(unittest.IsolatedAsyncioTestCase):
         await entered.wait()
 
         with patch(
-            "quantmind.etl._record._write_json_atomic",
+            "finsage.etl._record._write_json_atomic",
             side_effect=write_snapshot,
         ):
             task.cancel()
@@ -540,7 +540,7 @@ class PipelineRunTests(unittest.IsolatedAsyncioTestCase):
         )
 
         with patch(
-            "quantmind.etl._record._append_json_line",
+            "finsage.etl._record._append_json_line",
             side_effect=append_event,
         ):
             result = await run.execute()
@@ -709,7 +709,7 @@ class PipelineRunTests(unittest.IsolatedAsyncioTestCase):
         )
 
         with patch(
-            "quantmind.etl._record._monotonic_seconds",
+            "finsage.etl._record._monotonic_seconds",
             side_effect=[10.0, 10.1, 10.2],
         ):
             await run.execute()

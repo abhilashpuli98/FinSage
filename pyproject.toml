@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "quantmind"
+name = "finsage"
 version = "0.2.0"
-description = "QuantMind - Intelligent Knowledge Extraction and Retrieval Framework"
+description = "FinSage - Intelligent Knowledge Extraction and Retrieval Framework"
 requires-python = ">=3.10"
 dependencies = [
     "arxiv",
@@ -24,6 +24,15 @@ dependencies = [
     "llama-index-retrievers-bm25>=0.6,<0.7",
     "jinja2>=3.0.0",
     "trafilatura>=1.10",
+    # ── FinSage extension dependencies ──────────────────────────────────
+    "spacy>=3.7.0",
+    "chromadb>=0.5.0",
+    "networkx>=3.3",
+    "python-dateutil>=2.9.0",
+    "scipy>=1.13",
+    "bert-score>=0.3.13",
+    "pandas>=2.2",
+    "tqdm>=4.66",
 ]
 
 [project.optional-dependencies]
@@ -45,11 +54,12 @@ full = [
     "marker-pdf>=0.2.0",
     "beautifulsoup4>=4.12.0",
     "sentence-transformers>=2.2.0",
+    "spacy-transformers>=1.3",
 ]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["quantmind*"]
+include = ["finsage*"]
 
 [tool.setuptools.package-data]
 "*" = ["*.yaml", "*.yml", "*.json", "*.txt"]
@@ -94,13 +104,13 @@ convention = "google"
 # ----------------------------------------------------------------------------
 # basedpyright: type checker
 # ----------------------------------------------------------------------------
-# Every module in `quantmind/` is type-checked at "standard" mode. PR5
+# Every module in `finsage/` is type-checked at "standard" mode. PR5
 # deleted the transitional packages (`config/`, `flow/`, `llm/`,
 # `models/`) so the exclude list is now down to the directories pyright
 # always wants ignored.
 
 [tool.basedpyright]
-include = ["quantmind"]
+include = ["finsage"]
 exclude = [
     "**/__pycache__",
     "**/.venv",
@@ -127,154 +137,166 @@ reportIncompatibleVariableOverride = "none"
 # forbidden as a tripwire.
 
 [tool.importlinter]
-root_packages = ["quantmind"]
+root_packages = ["finsage"]
 
 [[tool.importlinter.contracts]]
 name = "etl is independent (stdlib only)"
 type = "forbidden"
-source_modules = ["quantmind.etl"]
+source_modules = ["finsage.etl"]
 forbidden_modules = [
-    "quantmind.configs",
-    "quantmind.flows",
-    "quantmind.knowledge",
-    "quantmind.library",
-    "quantmind.magic",
-    "quantmind.mind",
-    "quantmind.preprocess",
-    "quantmind.rag",
-    "quantmind.utils",
+    "finsage.configs",
+    "finsage.flows",
+    "finsage.knowledge",
+    "finsage.library",
+    "finsage.magic",
+    "finsage.mind",
+    "finsage.preprocess",
+    "finsage.rag",
+    "finsage.utils",
 ]
 
 [[tool.importlinter.contracts]]
-name = "utils is a leaf (no inbound deps from quantmind packages)"
+name = "utils is a leaf (no inbound deps from finsage packages)"
 type = "forbidden"
-source_modules = ["quantmind.utils"]
+source_modules = ["finsage.utils"]
 forbidden_modules = [
-    "quantmind.configs",
-    "quantmind.etl",
-    "quantmind.flows",
-    "quantmind.knowledge",
-    "quantmind.library",
-    "quantmind.magic",
-    "quantmind.mind",
-    "quantmind.preprocess",
-    "quantmind.rag",
+    "finsage.configs",
+    "finsage.etl",
+    "finsage.flows",
+    "finsage.knowledge",
+    "finsage.library",
+    "finsage.magic",
+    "finsage.mind",
+    "finsage.preprocess",
+    "finsage.rag",
 ]
 
 [[tool.importlinter.contracts]]
-name = "knowledge is a leaf (no inbound deps from quantmind packages)"
+name = "knowledge is a leaf (no inbound deps from finsage packages)"
 type = "forbidden"
-source_modules = ["quantmind.knowledge"]
+source_modules = ["finsage.knowledge"]
 forbidden_modules = [
-    "quantmind.configs",
-    "quantmind.etl",
-    "quantmind.flows",
-    "quantmind.library",
-    "quantmind.magic",
-    "quantmind.mind",
-    "quantmind.preprocess",
-    "quantmind.rag",
-    "quantmind.utils",
+    "finsage.configs",
+    "finsage.etl",
+    "finsage.flows",
+    "finsage.library",
+    "finsage.magic",
+    "finsage.mind",
+    "finsage.preprocess",
+    "finsage.rag",
+    "finsage.utils",
 ]
 
 [[tool.importlinter.contracts]]
 name = "configs only depends on knowledge"
 type = "forbidden"
-source_modules = ["quantmind.configs"]
+source_modules = ["finsage.configs"]
 forbidden_modules = [
-    "quantmind.etl",
-    "quantmind.flows",
-    "quantmind.library",
-    "quantmind.magic",
-    "quantmind.mind",
-    "quantmind.preprocess",
-    "quantmind.rag",
+    "finsage.etl",
+    "finsage.flows",
+    "finsage.library",
+    "finsage.magic",
+    "finsage.mind",
+    "finsage.preprocess",
+    "finsage.rag",
 ]
 
 [[tool.importlinter.contracts]]
 name = "preprocess only depends on utils (no inbound deps on configs/knowledge/flows)"
 type = "forbidden"
-source_modules = ["quantmind.preprocess"]
+source_modules = ["finsage.preprocess"]
 forbidden_modules = [
-    "quantmind.configs",
-    "quantmind.etl",
-    "quantmind.flows",
-    "quantmind.knowledge",
-    "quantmind.library",
-    "quantmind.magic",
-    "quantmind.mind",
-    "quantmind.rag",
+    "finsage.configs",
+    "finsage.etl",
+    "finsage.flows",
+    "finsage.knowledge",
+    "finsage.library",
+    "finsage.magic",
+    "finsage.mind",
+    "finsage.rag",
 ]
 
 [[tool.importlinter.contracts]]
 name = "library only depends on knowledge"
 type = "forbidden"
-source_modules = ["quantmind.library"]
+source_modules = ["finsage.library"]
 forbidden_modules = [
-    "quantmind.config",
-    "quantmind.configs",
-    "quantmind.etl",
-    "quantmind.flow",
-    "quantmind.flows",
-    "quantmind.llm",
-    "quantmind.magic",
-    "quantmind.mind",
-    "quantmind.models",
-    "quantmind.preprocess",
-    "quantmind.rag",
-    "quantmind.utils",
+    "finsage.config",
+    "finsage.configs",
+    "finsage.etl",
+    "finsage.flow",
+    "finsage.flows",
+    "finsage.llm",
+    "finsage.magic",
+    "finsage.mind",
+    "finsage.models",
+    "finsage.preprocess",
+    "finsage.rag",
+    "finsage.utils",
 ]
 
 [[tool.importlinter.contracts]]
 name = "rag only depends on preprocess"
 type = "forbidden"
-source_modules = ["quantmind.rag"]
+source_modules = ["finsage.rag"]
 forbidden_modules = [
-    "quantmind.config",
-    "quantmind.configs",
-    "quantmind.etl",
-    "quantmind.flow",
-    "quantmind.flows",
-    "quantmind.knowledge",
-    "quantmind.library",
-    "quantmind.llm",
-    "quantmind.magic",
-    "quantmind.mind",
-    "quantmind.models",
-    "quantmind.utils",
+    "finsage.config",
+    "finsage.configs",
+    "finsage.etl",
+    "finsage.flow",
+    "finsage.flows",
+    "finsage.knowledge",
+    "finsage.library",
+    "finsage.llm",
+    "finsage.magic",
+    "finsage.mind",
+    "finsage.models",
+    "finsage.utils",
 ]
 
 [[tool.importlinter.contracts]]
 name = "mind only depends on configs, knowledge, library, and utils"
 type = "forbidden"
-source_modules = ["quantmind.mind"]
+source_modules = ["finsage.mind"]
 forbidden_modules = [
-    "quantmind.config",
-    "quantmind.etl",
-    "quantmind.flow",
-    "quantmind.flows",
-    "quantmind.llm",
-    "quantmind.magic",
-    "quantmind.models",
-    "quantmind.preprocess",
-    "quantmind.rag",
+    "finsage.config",
+    "finsage.etl",
+    "finsage.flow",
+    "finsage.flows",
+    "finsage.llm",
+    "finsage.magic",
+    "finsage.models",
+    "finsage.preprocess",
+    "finsage.rag",
 ]
 
 [[tool.importlinter.contracts]]
 name = "flows + magic is apex (no transitional package imports)"
 type = "forbidden"
 source_modules = [
-    "quantmind.flows",
-    "quantmind.magic",
+    "finsage.flows",
+    "finsage.magic",
 ]
 # These packages were deleted in PR5; the contract guards against any
 # future code re-introducing them under the same names.
 forbidden_modules = [
-    "quantmind.config",
-    "quantmind.etl",
-    "quantmind.flow",
-    "quantmind.llm",
-    "quantmind.models",
+    "finsage.config",
+    "finsage.etl",
+    "finsage.flow",
+    "finsage.llm",
+    "finsage.models",
+]
+
+[[tool.importlinter.contracts]]
+# Module will be created in Phase 7
+name = "evaluation is apex (same as flows — can import from all finsage modules)"
+type = "forbidden"
+source_modules = ["finsage.evaluation"]
+forbidden_modules = [
+    "finsage.config",
+    "finsage.flow",
+    "finsage.llm",
+    "finsage.models",
 ]
 
 # ----------------------------------------------------------------------------
@@ -286,7 +308,7 @@ testpaths = ["tests"]
 # Coverage floor 75% — PR5 deleted the transitional packages so every
 # remaining module is in the target architecture and is well-tested.
 addopts = [
-    "--cov=quantmind",
+    "--cov=finsage",
     "--cov-report=term-missing",
     "--cov-fail-under=75",
     "-ra",
@@ -294,7 +316,7 @@ addopts = [
 asyncio_mode = "auto"
 
 [tool.coverage.run]
-source = ["quantmind"]
+source = ["finsage"]
 branch = true
 
 [tool.coverage.report]

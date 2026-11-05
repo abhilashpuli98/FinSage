@@ -34,7 +34,7 @@ retrieval-target rules, embedding model, or dimension:
 python scripts/examples/build_ai_infrastructure_bundle.py
 ```
 
-The build validates every source item as canonical QuantMind knowledge and
+The build validates every source item as canonical FinSage knowledge and
 removes an incomplete database if embedding generation fails.
 
 See [the library guide](../../docs/library.md) for storage, retrieval-grain, and

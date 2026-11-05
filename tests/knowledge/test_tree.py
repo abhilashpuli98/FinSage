@@ -7,8 +7,8 @@ from uuid import UUID, uuid4
 
 from pydantic import ValidationError
 
-from quantmind.knowledge._base import SourceRef
-from quantmind.knowledge._tree import TreeKnowledge, TreeNode
+from finsage.knowledge._base import SourceRef
+from finsage.knowledge._tree import TreeKnowledge, TreeNode
 
 
 def _now() -> datetime:

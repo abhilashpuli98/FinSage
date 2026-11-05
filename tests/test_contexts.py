@@ -108,8 +108,8 @@ class TestContextEntryPoints(unittest.TestCase):
         sources = (
             "AGENTS.md",
             "CLAUDE.md",
-            ".agents/skills/quantmind-dev/SKILL.md",
-            ".claude/skills/quantmind-dev/SKILL.md",
+            ".agents/skills/finsage-dev/SKILL.md",
+            ".claude/skills/finsage-dev/SKILL.md",
         )
         self.assertTrue(
             (repo_root / entry_point).is_file(),
@@ -133,8 +133,8 @@ class TestContextEntryPoints(unittest.TestCase):
         # repo-root backtick reference.
         references = {
             "contexts/dev/README.md": "](labels.md)",
-            ".agents/skills/quantmind-dev/SKILL.md": "`contexts/dev/labels.md`",
-            ".claude/skills/quantmind-dev/SKILL.md": "`contexts/dev/labels.md`",
+            ".agents/skills/finsage-dev/SKILL.md": "`contexts/dev/labels.md`",
+            ".claude/skills/finsage-dev/SKILL.md": "`contexts/dev/labels.md`",
         }
         for source_path, expected in references.items():
             with self.subTest(source=source_path):
@@ -195,16 +195,16 @@ class TestContextEntryPoints(unittest.TestCase):
             "contexts/dev/labels.md": "](github-writing.md)",
             "AGENTS.md": "](contexts/dev/github-writing.md)",
             "CLAUDE.md": "](contexts/dev/github-writing.md)",
-            ".agents/skills/quantmind-dev/SKILL.md": (
+            ".agents/skills/finsage-dev/SKILL.md": (
                 "`contexts/dev/github-writing.md`"
             ),
-            ".claude/skills/quantmind-dev/SKILL.md": (
+            ".claude/skills/finsage-dev/SKILL.md": (
                 "`contexts/dev/github-writing.md`"
             ),
-            ".agents/skills/quantmind-dev/references/pull-request.md": (
+            ".agents/skills/finsage-dev/references/pull-request.md": (
                 "`contexts/dev/github-writing.md`"
             ),
-            ".claude/skills/quantmind-dev/references/pull-request.md": (
+            ".claude/skills/finsage-dev/references/pull-request.md": (
                 "`contexts/dev/github-writing.md`"
             ),
         }
@@ -231,7 +231,7 @@ class TestContextEntryPoints(unittest.TestCase):
                     f"{template_path} must remind authors not to hard-wrap",
                 )
 
-    def test_quantmind_dev_skill_mirrors_match(self) -> None:
+    def test_finsage_dev_skill_mirrors_match(self) -> None:
         repo_root = Path(__file__).resolve().parents[1]
         mirror_paths = (
             "SKILL.md",
@@ -242,10 +242,10 @@ class TestContextEntryPoints(unittest.TestCase):
 
         for relative_path in mirror_paths:
             agents_skill = (
-                repo_root / ".agents/skills/quantmind-dev" / relative_path
+                repo_root / ".agents/skills/finsage-dev" / relative_path
             )
             claude_skill = (
-                repo_root / ".claude/skills/quantmind-dev" / relative_path
+                repo_root / ".claude/skills/finsage-dev" / relative_path
             )
             with self.subTest(path=relative_path):
                 self.assertEqual(

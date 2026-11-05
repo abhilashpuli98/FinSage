@@ -3,7 +3,7 @@
 import unittest
 from dataclasses import FrozenInstanceError
 
-from quantmind.preprocess import NewsArtifact, NewsBatch, NewsFailure
+from finsage.preprocess import NewsArtifact, NewsBatch, NewsFailure
 
 
 class NewsResultContractTests(unittest.TestCase):

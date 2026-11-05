@@ -5,7 +5,7 @@ from pathlib import Path
 
 from pydantic import TypeAdapter, ValidationError
 
-from quantmind.configs.paper import (
+from finsage.configs.paper import (
     ArxivIdentifier,
     DoiIdentifier,
     HttpUrl,

@@ -5,10 +5,10 @@ import asyncio
 import re
 from datetime import datetime, timedelta, timezone
 
-from quantmind.preprocess import NewsDocument
-from quantmind.preprocess.fetch.http import FetchPolicy, HttpFetcher
-from quantmind.preprocess.fetch.rss import fetch_rss_feed
-from quantmind.preprocess.pr_newswire import (
+from finsage.preprocess import NewsDocument
+from finsage.preprocess.fetch.http import FetchPolicy, HttpFetcher
+from finsage.preprocess.fetch.rss import fetch_rss_feed
+from finsage.preprocess.pr_newswire import (
     PRNewswireDiscovery,
     _collect_observation,
     _discover_pr_newswire,

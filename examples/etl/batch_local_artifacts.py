@@ -8,7 +8,7 @@ import json
 import math
 from pathlib import Path
 
-from quantmind.etl import BatchETLPipeline, PipelineContext
+from finsage.etl import BatchETLPipeline, PipelineContext
 
 BATCH_SIZE = 2
 
@@ -42,7 +42,7 @@ async def transform(
 
 async def run_example(*, dry_run: bool) -> dict[str, object]:
     """Create the run, print its receipt, then execute all batches."""
-    artifact_dir = Path.cwd() / ".quant-mind" / "etl-batch-example"
+    artifact_dir = Path.cwd() / ".finsage" / "etl-batch-example"
 
     async def load(
         records: list[dict[str, object]], *, ctx: PipelineContext

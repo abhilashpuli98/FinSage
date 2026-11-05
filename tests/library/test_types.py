@@ -3,9 +3,9 @@ from datetime import datetime
 
 from pydantic import ValidationError
 
-import quantmind.library as library
-from quantmind.knowledge import PaperArtifactKind
-from quantmind.library import SemanticQuery
+import finsage.library as library
+from finsage.knowledge import PaperArtifactKind
+from finsage.library import SemanticQuery
 
 
 class PublicTypeTests(unittest.TestCase):

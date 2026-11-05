@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
-from quantmind.preprocess import (
+from finsage.preprocess import (
     NewsArtifact,
     NewsDocument,
     NewsTickerHint,

@@ -7,7 +7,7 @@ import asyncio
 import json
 from pathlib import Path
 
-from quantmind.etl import ETLPipeline, PipelineContext
+from finsage.etl import ETLPipeline, PipelineContext
 
 LoadResult = dict[str, object]
 
@@ -27,7 +27,7 @@ async def transform(text: str, *, ctx: PipelineContext) -> dict[str, object]:
 
 async def run_example(*, dry_run: bool) -> LoadResult:
     """Create the run, print its receipt, then execute all stages."""
-    artifact = Path.cwd() / ".quant-mind" / "etl-example" / "artifact.json"
+    artifact = Path.cwd() / ".finsage" / "etl-example" / "artifact.json"
 
     async def load(
         summary: dict[str, object], *, ctx: PipelineContext

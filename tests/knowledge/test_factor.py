@@ -3,8 +3,8 @@
 import unittest
 from datetime import datetime, timezone
 
-from quantmind.knowledge._base import SourceRef
-from quantmind.knowledge.factor import Factor
+from finsage.knowledge._base import SourceRef
+from finsage.knowledge.factor import Factor
 
 
 def _now() -> datetime:

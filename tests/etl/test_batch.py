@@ -2,7 +2,6 @@
 
 import asyncio
 import json
-import os
 import subprocess
 import sys
 import tempfile
@@ -12,8 +11,8 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
-import quantmind.etl._record as record_module
-from quantmind.etl import BatchETLPipeline, PipelineContext
+import finsage.etl._record as record_module
+from finsage.etl import BatchETLPipeline, PipelineContext
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -75,7 +74,7 @@ class BatchPipelineRunTests(unittest.IsolatedAsyncioTestCase):
         )
 
         snapshot = _read_json(run.status_file)
-        self.assertEqual(snapshot["schema"], "quantmind.etl.batch-run/v1")
+        self.assertEqual(snapshot["schema"], "finsage.etl.batch-run/v1")
         self.assertTrue(snapshot["dry_run"])
         self.assertEqual(snapshot["state"], "created")
         self.assertIsNone(snapshot["stage"])
@@ -189,12 +188,12 @@ class BatchPipelineRunTests(unittest.IsolatedAsyncioTestCase):
         await run.execute()
 
         snapshot = _read_json(run.status_file)
-        self.assertEqual(snapshot["schema"], "quantmind.etl.batch-run/v1")
+        self.assertEqual(snapshot["schema"], "finsage.etl.batch-run/v1")
         self.assertTrue(snapshot["dry_run"])
         events = _read_events(run.events_file)
         self.assertGreater(len(events), 0)
         for event in events:
-            self.assertEqual(event["schema"], "quantmind.etl.batch-event/v1")
+            self.assertEqual(event["schema"], "finsage.etl.batch-event/v1")
             self.assertEqual(event["run_id"], run.id)
             self.assertTrue(event["dry_run"])
 
@@ -255,7 +254,7 @@ class BatchPipelineRunTests(unittest.IsolatedAsyncioTestCase):
     async def test_json_records_escape_surrogate_strings_recursively(
         self,
     ) -> None:
-        unsafe = os.fsdecode(b"\xff")
+        unsafe = chr(0xDCFF)
         safe = _json_safe_text(unsafe)
 
         async def transform(batch: int, *, ctx: PipelineContext) -> int:
@@ -811,8 +810,8 @@ import asyncio
 import tempfile
 from pathlib import Path
 
-import quantmind.etl._batch as batch_module
-from quantmind.etl import BatchETLPipeline, PipelineContext
+import finsage.etl._batch as batch_module
+from finsage.etl import BatchETLPipeline, PipelineContext
 
 if hasattr(batch_module, "_EXTRACTOR_CLOSE_TIMEOUT_SECONDS"):
     batch_module._EXTRACTOR_CLOSE_TIMEOUT_SECONDS = 0.01
@@ -958,7 +957,7 @@ asyncio.run(main())
         )
 
         with patch(
-            "quantmind.etl._record._append_json_line",
+            "finsage.etl._record._append_json_line",
             side_effect=append_event,
         ):
             with self.assertRaisesRegex(LookupError, "batch load failed"):
@@ -986,7 +985,7 @@ asyncio.run(main())
         )
 
         with patch(
-            "quantmind.etl._record._append_json_line",
+            "finsage.etl._record._append_json_line",
             side_effect=append_event,
         ):
             with self.assertRaisesRegex(LookupError, "batch load failed"):

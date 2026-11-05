@@ -6,7 +6,7 @@ from datetime import timezone
 import httpx
 import respx
 
-from quantmind.preprocess.fetch.doi import (
+from finsage.preprocess.fetch.doi import (
     CROSSREF_BASE_URL,
     CrossrefMetadata,
     resolve_doi,

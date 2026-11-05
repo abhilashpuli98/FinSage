@@ -20,11 +20,11 @@ import asyncio
 import sys
 from pathlib import Path
 
-from quantmind.configs import PaperStructureCfg, RetrievalCfg
-from quantmind.configs.paper import LocalFilePath
-from quantmind.flows import PaperFlow
-from quantmind.knowledge import PaperStructureTree
-from quantmind.mind import AgenticRetriever
+from finsage.configs import PaperStructureCfg, RetrievalCfg
+from finsage.configs.paper import LocalFilePath
+from finsage.flows import PaperFlow
+from finsage.knowledge import PaperStructureTree
+from finsage.mind import AgenticRetriever
 
 _QUESTION = "What are the main method and limitations?"
 
@@ -55,7 +55,7 @@ async def _optional_persist_reopen(tree: PaperStructureTree) -> None:
     is stored standalone; no source object is needed), over which ``retrieve``
     behaves identically. Delete it if you only need in-memory retrieval.
     """
-    from quantmind.library import LocalKnowledgeLibrary
+    from finsage.library import LocalKnowledgeLibrary
 
     library = await LocalKnowledgeLibrary.open(
         ":memory:",

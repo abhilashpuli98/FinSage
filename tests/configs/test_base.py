@@ -5,7 +5,7 @@ import unittest
 from agents import ModelSettings
 from pydantic import ValidationError
 
-from quantmind.configs.base import BaseFlowCfg, BaseInput
+from finsage.configs.base import BaseFlowCfg, BaseInput
 
 
 class BaseFlowCfgTests(unittest.TestCase):
@@ -42,13 +42,13 @@ class BaseInputTests(unittest.TestCase):
 
 class PackageExportTests(unittest.TestCase):
     def test_top_level_imports(self):
-        from quantmind.configs import (
+        from finsage.configs import (
             BaseFlowCfg as BaseFlowCfgExport,
         )
-        from quantmind.configs import (
+        from finsage.configs import (
             BaseInput as BaseInputExport,
         )
-        from quantmind.configs import (
+        from finsage.configs import (
             EarningsFlowCfg,
             NewsCollectionCfg,
             PaperSemanticCfg,

@@ -1,4 +1,4 @@
-# Sample QuantMind Document
+# Sample FinSage Document
 
 ## Section One
 

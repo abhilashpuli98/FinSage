@@ -4,7 +4,7 @@ import unittest
 
 from pydantic import ValidationError
 
-from quantmind.configs import PaperStructureCfg
+from finsage.configs import PaperStructureCfg
 
 
 class PaperStructureCfgTests(unittest.TestCase):

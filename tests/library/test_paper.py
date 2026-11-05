@@ -5,14 +5,15 @@ import sqlite3
 import tempfile
 import unittest
 from collections.abc import Sequence
+from contextlib import closing
 from pathlib import Path
 
-from quantmind.knowledge import (
+from finsage.knowledge import (
     PaperArtifactKind,
     PaperChunk,
     PaperGlobalSummary,
 )
-from quantmind.library import LocalKnowledgeLibrary, SemanticQuery
+from finsage.library import LocalKnowledgeLibrary, SemanticQuery
 from tests.paper_helpers import build_paper_result
 
 
@@ -84,7 +85,7 @@ class PaperLibraryTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(len(provider.calls), 1)
         self.assertEqual(len(provider.calls[0]), 4)
-        with sqlite3.connect(self.db_path) as db:
+        with closing(sqlite3.connect(self.db_path)) as db, db:
             self.assertEqual(db.execute("PRAGMA user_version").fetchone()[0], 5)
             self.assertEqual(
                 db.execute("SELECT COUNT(*) FROM paper_sources").fetchone()[0],
@@ -271,7 +272,7 @@ class PaperLibraryTests(unittest.IsolatedAsyncioTestCase):
             )
         finally:
             await library.close()
-        with sqlite3.connect(self.db_path) as db:
+        with closing(sqlite3.connect(self.db_path)) as db, db:
             self.assertEqual(
                 db.execute("SELECT COUNT(*) FROM paper_artifacts").fetchone()[
                     0
@@ -297,7 +298,7 @@ class PaperLibraryTests(unittest.IsolatedAsyncioTestCase):
                 await library.put_paper(build_paper_result())
         finally:
             await library.close()
-        with sqlite3.connect(self.db_path) as db:
+        with closing(sqlite3.connect(self.db_path)) as db, db:
             self.assertEqual(
                 db.execute("SELECT COUNT(*) FROM paper_sources").fetchone()[0],
                 0,
@@ -326,7 +327,7 @@ class PaperLibraryTests(unittest.IsolatedAsyncioTestCase):
         await library.put_paper(result)
         await library.close()
 
-        with sqlite3.connect(self.db_path) as db:
+        with closing(sqlite3.connect(self.db_path)) as db, db:
             db.execute(
                 "UPDATE paper_source_assets SET media_type = ?",
                 ("application/tampered",),
@@ -355,7 +356,7 @@ class PaperLibraryTests(unittest.IsolatedAsyncioTestCase):
         await library.put_paper(result)
         await library.close()
 
-        with sqlite3.connect(self.db_path) as db:
+        with closing(sqlite3.connect(self.db_path)) as db, db:
             db.execute(
                 "DELETE FROM paper_artifact_lineage WHERE artifact_id = ?",
                 (str(result.global_summary.id),),
@@ -385,7 +386,7 @@ class PaperLibraryTests(unittest.IsolatedAsyncioTestCase):
         await library.close()
 
         tampered = "tampered summary projection"
-        with sqlite3.connect(self.db_path) as db:
+        with closing(sqlite3.connect(self.db_path)) as db, db:
             db.execute(
                 """
                 UPDATE paper_projections

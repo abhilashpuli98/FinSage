@@ -7,9 +7,9 @@ from unittest.mock import patch
 import httpx
 import respx
 
-from quantmind.preprocess.fetch.http import FetchPolicy
-from quantmind.preprocess.news import build_news_identity
-from quantmind.preprocess.pr_newswire import (
+from finsage.preprocess.fetch.http import FetchPolicy
+from finsage.preprocess.news import build_news_identity
+from finsage.preprocess.pr_newswire import (
     _collect_pr_newswire,
     _discover_pr_newswire,
 )
@@ -74,7 +74,7 @@ class DiscoverPRNewswireTests(unittest.IsolatedAsyncioTestCase):
 
         with (
             patch(
-                "quantmind.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
+                "finsage.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
                 _TEST_POLICY,
             ),
             respx.mock(assert_all_called=True) as router,
@@ -132,7 +132,7 @@ class DiscoverPRNewswireTests(unittest.IsolatedAsyncioTestCase):
     ) -> None:
         with (
             patch(
-                "quantmind.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
+                "finsage.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
                 _TEST_POLICY,
             ),
             respx.mock(assert_all_called=True) as router,
@@ -179,7 +179,7 @@ class DiscoverPRNewswireTests(unittest.IsolatedAsyncioTestCase):
 
         with (
             patch(
-                "quantmind.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
+                "finsage.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
                 _TEST_POLICY,
             ),
             respx.mock(assert_all_called=True) as router,
@@ -224,7 +224,7 @@ class DiscoverPRNewswireTests(unittest.IsolatedAsyncioTestCase):
         """
         with (
             patch(
-                "quantmind.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
+                "finsage.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
                 _TEST_POLICY,
             ),
             respx.mock(assert_all_called=True) as router,
@@ -245,7 +245,7 @@ class DiscoverPRNewswireTests(unittest.IsolatedAsyncioTestCase):
     async def test_fetch_failure_is_recorded(self) -> None:
         with (
             patch(
-                "quantmind.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
+                "finsage.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
                 _TEST_POLICY,
             ),
             respx.mock(assert_all_called=True) as router,
@@ -277,10 +277,10 @@ class DiscoverPRNewswireTests(unittest.IsolatedAsyncioTestCase):
 
         with (
             patch(
-                "quantmind.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
+                "finsage.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
                 _TEST_POLICY,
             ),
-            patch("quantmind.preprocess.pr_newswire._MAX_PAGES", 2),
+            patch("finsage.preprocess.pr_newswire._MAX_PAGES", 2),
             respx.mock(assert_all_called=True) as router,
         ):
             router.get(url__regex=_LISTING_RE).mock(side_effect=respond)
@@ -296,7 +296,7 @@ class DiscoverPRNewswireTests(unittest.IsolatedAsyncioTestCase):
     async def test_cache_bust_retries_listing_404(self) -> None:
         with (
             patch(
-                "quantmind.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
+                "finsage.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
                 _TEST_POLICY,
             ),
             respx.mock(assert_all_called=True) as router,
@@ -345,7 +345,7 @@ class CollectPRNewswireTests(unittest.IsolatedAsyncioTestCase):
         )
         with (
             patch(
-                "quantmind.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
+                "finsage.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
                 _TEST_POLICY,
             ),
             respx.mock(assert_all_called=True) as router,
@@ -395,7 +395,7 @@ class CollectPRNewswireTests(unittest.IsolatedAsyncioTestCase):
         )
         with (
             patch(
-                "quantmind.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
+                "finsage.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
                 _TEST_POLICY,
             ),
             respx.mock(assert_all_called=True) as router,
@@ -419,7 +419,7 @@ class CollectPRNewswireTests(unittest.IsolatedAsyncioTestCase):
 
         with (
             patch(
-                "quantmind.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
+                "finsage.preprocess.pr_newswire._DEFAULT_FETCH_POLICY",
                 _TEST_POLICY,
             ),
             respx.mock(assert_all_called=True) as router,

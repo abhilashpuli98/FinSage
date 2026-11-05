@@ -4,7 +4,7 @@ import unittest
 
 from pydantic import TypeAdapter, ValidationError
 
-from quantmind.configs.earnings import (
+from finsage.configs.earnings import (
     EarningsFlowCfg,
     EarningsInput,
     HttpUrl,

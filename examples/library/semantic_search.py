@@ -7,8 +7,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from quantmind.knowledge import TreeKnowledge
-from quantmind.library import LocalKnowledgeLibrary, SemanticQuery
+from finsage.knowledge import TreeKnowledge
+from finsage.library import LocalKnowledgeLibrary, SemanticQuery
 
 _BUNDLE_PATH = Path(__file__).parent / "data" / "ai_infrastructure.db"
 _EMBEDDING_MODEL = "text-embedding-3-small"

@@ -7,15 +7,15 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from quantmind.configs import PaperSemanticCfg
-from quantmind.configs.paper import ArxivIdentifier
-from quantmind.flows import PaperFlow
-from quantmind.knowledge import (
+from finsage.configs import PaperSemanticCfg
+from finsage.configs.paper import ArxivIdentifier
+from finsage.flows import PaperFlow
+from finsage.knowledge import (
     PaperArtifactKind,
     PaperChunk,
     PaperGlobalSummary,
 )
-from quantmind.library import (
+from finsage.library import (
     LocalKnowledgeLibrary,
     SemanticHit,
     SemanticQuery,
@@ -60,7 +60,7 @@ async def main() -> None:
     if not os.getenv("OPENAI_API_KEY"):
         raise SystemExit("Set OPENAI_API_KEY before running this example.")
 
-    workspace = Path(".quantmind")
+    workspace = Path(".finsage")
     workspace.mkdir(exist_ok=True)
     flow = PaperFlow(
         PaperSemanticCfg(

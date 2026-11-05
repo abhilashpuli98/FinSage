@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 from pydantic import ValidationError
 
-from quantmind.configs import NewsCollectionCfg, NewsWindow
+from finsage.configs import NewsCollectionCfg, NewsWindow
 
 
 class NewsCollectionCfgTests(unittest.TestCase):

@@ -3,8 +3,8 @@
 import asyncio
 from datetime import datetime, timedelta, timezone
 
-from quantmind.configs import NewsCollectionCfg, NewsWindow
-from quantmind.flows import collect_news
+from finsage.configs import NewsCollectionCfg, NewsWindow
+from finsage.flows import collect_news
 
 
 async def main() -> None:

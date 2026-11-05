@@ -5,16 +5,17 @@ import sqlite3
 import tempfile
 import unittest
 from collections.abc import Sequence
+from contextlib import closing
 from pathlib import Path
 from uuid import uuid4
 
-from quantmind.knowledge import (
+from finsage.knowledge import (
     ArtifactLocator,
     PaperArtifactKind,
     PaperStructureTree,
     TreeNode,
 )
-from quantmind.library import LocalKnowledgeLibrary, SemanticQuery
+from finsage.library import LocalKnowledgeLibrary, SemanticQuery
 from tests.paper_helpers import build_paper_result, build_paper_structure_tree
 
 
@@ -68,7 +69,7 @@ class StructureTreeLibraryTests(unittest.IsolatedAsyncioTestCase):
         await library.close()
 
         self.assertEqual(provider.calls, [])
-        with sqlite3.connect(self.db_path) as db:
+        with closing(sqlite3.connect(self.db_path)) as db, db:
             self.assertEqual(db.execute("PRAGMA user_version").fetchone()[0], 5)
             # A self-contained tree is stored on its own: no source revision and
             # no chunk set are required or present.
@@ -204,7 +205,7 @@ class StructureTreeLibraryTests(unittest.IsolatedAsyncioTestCase):
         finally:
             await library.close()
 
-        with sqlite3.connect(self.db_path) as db:
+        with closing(sqlite3.connect(self.db_path)) as db, db:
             self.assertEqual(
                 db.execute("SELECT COUNT(*) FROM paper_artifacts").fetchone()[
                     0
@@ -228,7 +229,7 @@ class StructureTreeLibraryTests(unittest.IsolatedAsyncioTestCase):
         finally:
             await library.close()
 
-        with sqlite3.connect(self.db_path) as db:
+        with closing(sqlite3.connect(self.db_path)) as db, db:
             self.assertEqual(
                 db.execute("SELECT COUNT(*) FROM paper_artifacts").fetchone()[
                     0
@@ -245,7 +246,7 @@ class StructureTreeLibraryTests(unittest.IsolatedAsyncioTestCase):
         await library.close()
 
         node = next(value for value in tree.nodes.values() if value.parent_id)
-        with sqlite3.connect(self.db_path) as db:
+        with closing(sqlite3.connect(self.db_path)) as db, db:
             db.execute(
                 """
                 UPDATE paper_artifact_members SET position = 99
@@ -270,7 +271,7 @@ class SchemaMigrationTests(unittest.IsolatedAsyncioTestCase):
     ) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "v3.db"
-            with sqlite3.connect(path) as db:
+            with closing(sqlite3.connect(path)) as db, db:
                 db.executescript(
                     """
                     CREATE TABLE paper_sources (
@@ -314,7 +315,7 @@ class SchemaMigrationTests(unittest.IsolatedAsyncioTestCase):
             )
             await library.close()
 
-            with sqlite3.connect(path) as db:
+            with closing(sqlite3.connect(path)) as db, db:
                 self.assertEqual(
                     db.execute("PRAGMA user_version").fetchone()[0],
                     5,

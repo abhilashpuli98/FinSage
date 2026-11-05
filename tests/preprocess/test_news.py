@@ -8,8 +8,8 @@ from pathlib import Path
 import httpx
 import respx
 
-from quantmind.preprocess.fetch.rss import FeedItem
-from quantmind.preprocess.news import (
+from finsage.preprocess.fetch.rss import FeedItem
+from finsage.preprocess.news import (
     RawNewsDocument,
     build_news_identity,
     build_sec_news_identity,
@@ -22,7 +22,7 @@ from quantmind.preprocess.news import (
     preprocess_feed_item,
     preprocess_news_document,
 )
-from quantmind.preprocess.time import parse_news_datetime
+from finsage.preprocess.time import parse_news_datetime
 
 _FIXTURES = Path(__file__).parent / "fixtures" / "pr_newswire"
 

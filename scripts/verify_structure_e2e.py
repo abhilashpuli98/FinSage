@@ -16,10 +16,10 @@ from typing import Any
 
 from dotenv import load_dotenv
 
-from quantmind.configs import PaperStructureCfg, RetrievalCfg
-from quantmind.configs.paper import LocalFilePath
-from quantmind.flows import PaperFlow
-from quantmind.mind import AgenticRetriever
+from finsage.configs import PaperStructureCfg, RetrievalCfg
+from finsage.configs.paper import LocalFilePath
+from finsage.flows import PaperFlow
+from finsage.mind import AgenticRetriever
 
 _PDF = (
     Path(__file__).resolve().parents[1]

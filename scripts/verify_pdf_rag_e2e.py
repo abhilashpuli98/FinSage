@@ -9,15 +9,15 @@ from typing import Any
 
 from dotenv import load_dotenv
 
-from quantmind.configs import PaperSemanticCfg
-from quantmind.configs.paper import ArxivIdentifier
-from quantmind.flows import PaperFlow
-from quantmind.knowledge import (
+from finsage.configs import PaperSemanticCfg
+from finsage.configs.paper import ArxivIdentifier
+from finsage.flows import PaperFlow
+from finsage.knowledge import (
     PaperArtifactKind,
     PaperChunk,
     PaperGlobalSummary,
 )
-from quantmind.library import LocalKnowledgeLibrary, SemanticQuery
+from finsage.library import LocalKnowledgeLibrary, SemanticQuery
 
 _ARXIV_ID = "1706.03762v7"
 _EMBEDDING_MODEL = "text-embedding-3-small"
@@ -50,7 +50,7 @@ async def _search_and_resolve(
 
 
 async def _run_vertical_slice() -> dict[str, Any]:
-    with tempfile.TemporaryDirectory(prefix="quantmind-paper-v1-") as directory:
+    with tempfile.TemporaryDirectory(prefix="finsage-paper-v1-") as directory:
         root = Path(directory)
         flow = PaperFlow(
             PaperSemanticCfg(

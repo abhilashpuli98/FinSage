@@ -9,7 +9,7 @@ import hashlib
 from datetime import datetime, timezone
 from typing import Literal
 
-from quantmind.knowledge import (
+from finsage.knowledge import (
     PaperChunkingConfig,
     PaperChunkInput,
     PaperChunkSet,

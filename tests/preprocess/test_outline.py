@@ -3,7 +3,7 @@
 import unittest
 from pathlib import Path
 
-from quantmind.preprocess import (
+from finsage.preprocess import (
     BoundingBox,
     ParsedDocument,
     ParsedPage,

@@ -2,7 +2,7 @@
 
 from datetime import datetime, timezone
 
-from quantmind.preprocess.news import RawNewsDocument, preprocess_news_document
+from finsage.preprocess.news import RawNewsDocument, preprocess_news_document
 
 raw = RawNewsDocument(
     title="Carnival Announces Results",

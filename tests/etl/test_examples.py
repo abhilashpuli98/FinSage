@@ -29,7 +29,7 @@ async def _run_without_stdout(coro):
 
 def _read_run_snapshot(root: Path) -> dict[str, object]:
     snapshots = sorted(
-        (root / ".quant-mind" / "etl-pipeline-runs").glob("*/run.json")
+        (root / ".finsage" / "etl-pipeline-runs").glob("*/run.json")
     )
     if len(snapshots) != 1:
         raise AssertionError(f"expected one run snapshot, found {snapshots}")
@@ -47,7 +47,7 @@ class ETLExampleTests(unittest.IsolatedAsyncioTestCase):
                     local_artifact.run_example(dry_run=True)
                 )
 
-            artifact = root / ".quant-mind" / "etl-example" / "artifact.json"
+            artifact = root / ".finsage" / "etl-example" / "artifact.json"
             self.assertFalse(artifact.exists())
             self.assertTrue(result["dry_run"])
             self.assertEqual(result["planned_artifacts"], 1)
@@ -78,7 +78,7 @@ class ETLExampleTests(unittest.IsolatedAsyncioTestCase):
                     local_artifact.run_example(dry_run=False)
                 )
 
-            artifact = root / ".quant-mind" / "etl-example" / "artifact.json"
+            artifact = root / ".finsage" / "etl-example" / "artifact.json"
             self.assertTrue(artifact.exists())
             self.assertFalse(result["dry_run"])
             self.assertEqual(
@@ -98,7 +98,7 @@ class ETLExampleTests(unittest.IsolatedAsyncioTestCase):
                     batch_local_artifacts.run_example(dry_run=True)
                 )
 
-            artifact_dir = root / ".quant-mind" / "etl-batch-example"
+            artifact_dir = root / ".finsage" / "etl-batch-example"
             self.assertFalse(artifact_dir.exists())
             self.assertTrue(result["dry_run"])
             self.assertEqual(result["completed_batches"], 2)
@@ -126,7 +126,7 @@ class ETLExampleTests(unittest.IsolatedAsyncioTestCase):
                     batch_local_artifacts.run_example(dry_run=False)
                 )
 
-            artifact_dir = root / ".quant-mind" / "etl-batch-example"
+            artifact_dir = root / ".finsage" / "etl-batch-example"
             self.assertTrue((artifact_dir / "batch-001.json").exists())
             self.assertTrue((artifact_dir / "batch-002.json").exists())
             self.assertFalse(result["dry_run"])

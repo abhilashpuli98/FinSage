@@ -9,8 +9,8 @@ import unittest
 from typing import Any
 from unittest.mock import patch
 
-from quantmind.utils import usage
-from quantmind.utils.usage import RunUsage, SpanCollector, usage_scope
+from finsage.utils import usage
+from finsage.utils.usage import RunUsage, SpanCollector, usage_scope
 
 
 class _SpanData:
@@ -258,7 +258,7 @@ class UsageScopeTests(unittest.TestCase):
         usage._collector = None
 
     def test_populates_usage_on_exit_and_evicts(self) -> None:
-        with usage_scope("quantmind.paper") as run:
+        with usage_scope("finsage.paper") as run:
             trace_id = run.trace_id
             collector = usage._get_collector()
             collector.on_span_end(

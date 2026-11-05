@@ -4,10 +4,10 @@ import unittest
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, patch
 
-from quantmind.configs import NewsCollectionCfg, NewsWindow
-from quantmind.flows import collect_news
-from quantmind.magic import _introspect_flow_signature
-from quantmind.preprocess import NewsBatch
+from finsage.configs import NewsCollectionCfg, NewsWindow
+from finsage.flows import collect_news
+from finsage.magic import _introspect_flow_signature
+from finsage.preprocess import NewsBatch
 
 
 class CollectNewsTests(unittest.IsolatedAsyncioTestCase):
@@ -22,7 +22,7 @@ class CollectNewsTests(unittest.IsolatedAsyncioTestCase):
         expected = NewsBatch(observed_count=3, complete=True)
 
         with patch(
-            "quantmind.flows.news._collect_pr_newswire",
+            "finsage.flows.news._collect_pr_newswire",
             new=AsyncMock(return_value=expected),
         ) as collect:
             result = await collect_news(
@@ -45,7 +45,7 @@ class CollectNewsTests(unittest.IsolatedAsyncioTestCase):
         )
 
         with patch(
-            "quantmind.flows.news._collect_pr_newswire",
+            "finsage.flows.news._collect_pr_newswire",
             new=AsyncMock(return_value=NewsBatch(complete=True)),
         ) as collect:
             await collect_news(window)

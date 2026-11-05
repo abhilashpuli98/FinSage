@@ -6,7 +6,7 @@ from datetime import timezone
 import httpx
 import respx
 
-from quantmind.preprocess.fetch.rss import fetch_rss_feed, parse_feed
+from finsage.preprocess.fetch.rss import fetch_rss_feed, parse_feed
 
 _RSS = b"""\
 <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">

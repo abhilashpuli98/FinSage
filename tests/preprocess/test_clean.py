@@ -2,7 +2,7 @@
 
 import unittest
 
-from quantmind.preprocess.clean import (
+from finsage.preprocess.clean import (
     collapse_whitespace,
     dedupe_lines,
     normalize_unicode,

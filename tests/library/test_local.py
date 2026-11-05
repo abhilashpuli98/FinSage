@@ -3,11 +3,12 @@ import sqlite3
 import tempfile
 import unittest
 from collections.abc import Sequence
+from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import UUID, uuid4
 
-from quantmind.knowledge import (
+from finsage.knowledge import (
     Citation,
     FlattenKnowledge,
     LegacyPaper,
@@ -15,7 +16,7 @@ from quantmind.knowledge import (
     SourceRef,
     TreeNode,
 )
-from quantmind.library import LocalKnowledgeLibrary, SemanticQuery
+from finsage.library import LocalKnowledgeLibrary, SemanticQuery
 
 
 class _FakeEmbeddingProvider:
@@ -239,7 +240,7 @@ class LocalKnowledgeLibraryTests(unittest.IsolatedAsyncioTestCase):
         try:
             await library.put(unrelated)
             await library.put(paper)
-            with sqlite3.connect(self.db_path) as db:
+            with closing(sqlite3.connect(self.db_path)) as db, db:
                 root_row = db.execute(
                     """
                     SELECT item_shape, payload_json, node_count
@@ -531,7 +532,7 @@ class LocalKnowledgeLibraryTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(len(provider.calls), calls_before_search)
         finally:
             await library.close()
-        with sqlite3.connect(self.db_path) as db:
+        with closing(sqlite3.connect(self.db_path)) as db, db:
             self.assertEqual(
                 db.execute("SELECT COUNT(*) FROM knowledge_items").fetchone()[
                     0
@@ -562,7 +563,7 @@ class LocalKnowledgeLibraryTests(unittest.IsolatedAsyncioTestCase):
         )
         try:
             await library.put(item)
-            with sqlite3.connect(self.db_path) as db:
+            with closing(sqlite3.connect(self.db_path)) as db, db:
                 db.execute(
                     "UPDATE knowledge_items SET payload_json = '{}' "
                     "WHERE item_id = ?",
@@ -589,7 +590,7 @@ class LocalKnowledgeLibraryTests(unittest.IsolatedAsyncioTestCase):
         )
         await library.put(item)
         await library.close()
-        with sqlite3.connect(self.db_path) as db:
+        with closing(sqlite3.connect(self.db_path)) as db, db:
             db.execute("PRAGMA foreign_keys = OFF")
             db.execute(
                 "DELETE FROM knowledge_items WHERE item_id = ?", (str(item.id),)
@@ -622,7 +623,7 @@ class LocalKnowledgeLibraryTests(unittest.IsolatedAsyncioTestCase):
         )
         try:
             await library.put(paper)
-            with sqlite3.connect(self.db_path) as db:
+            with closing(sqlite3.connect(self.db_path)) as db, db:
                 db.execute(
                     """
                     UPDATE knowledge_nodes SET payload_json = '{}'
@@ -650,7 +651,7 @@ class LocalKnowledgeLibraryTests(unittest.IsolatedAsyncioTestCase):
         )
         await library.put(item)
         await library.close()
-        with sqlite3.connect(self.db_path) as db:
+        with closing(sqlite3.connect(self.db_path)) as db, db:
             db.execute(
                 "UPDATE semantic_records SET embedding = ? WHERE item_id = ?",
                 (b"bad", str(item.id)),

@@ -3,7 +3,7 @@
 import unittest
 from pathlib import Path
 
-from quantmind.preprocess.format.html import html_to_markdown
+from finsage.preprocess.format.html import html_to_markdown
 
 _FIXTURE = Path(__file__).resolve().parent.parent / "fixtures" / "sample.html"
 

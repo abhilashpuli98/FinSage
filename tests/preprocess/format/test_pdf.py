@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 
 import pymupdf
 
-from quantmind.preprocess.format.pdf import (
+from finsage.preprocess.format.pdf import (
     PdfParseError,
     parse_pdf,
     pdf_to_markdown,

@@ -5,8 +5,8 @@ from datetime import datetime, timezone
 
 from pydantic import ValidationError
 
-from quantmind.knowledge._base import SourceRef
-from quantmind.knowledge.news import News
+from finsage.knowledge._base import SourceRef
+from finsage.knowledge.news import News
 
 
 def _now() -> datetime:

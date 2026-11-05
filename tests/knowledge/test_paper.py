@@ -5,13 +5,13 @@ from uuid import uuid4
 
 from pydantic import ValidationError
 
-from quantmind.knowledge import (
+from finsage.knowledge import (
     PaperCitation,
     PaperSemanticResult,
     PaperSourceRevision,
     PaperSourceSpan,
 )
-from quantmind.knowledge.paper import (
+from finsage.knowledge.paper import (
     _paper_chunk_id,
     _paper_chunk_set_content_hash,
     _paper_summary_content_hash,

@@ -3,7 +3,7 @@
 import unittest
 from datetime import date, datetime, timedelta, timezone
 
-from quantmind.preprocess.time import (
+from finsage.preprocess.time import (
     business_days_between,
     parse_filing_date,
     to_utc,

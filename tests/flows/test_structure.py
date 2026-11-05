@@ -9,19 +9,19 @@ import httpx
 from agents import ModelSettings
 from openai import BadRequestError
 
-from quantmind.configs import BaseFlowCfg, PaperStructureCfg
-from quantmind.configs.paper import LocalFilePath
-from quantmind.flows import PaperFlow, PaperStructureError
-from quantmind.flows.paper._structure import (
+from finsage.configs import BaseFlowCfg, PaperStructureCfg
+from finsage.configs.paper import LocalFilePath
+from finsage.flows import PaperFlow, PaperStructureError
+from finsage.flows.paper._structure import (
     _AgentsPaperStructureProvider,
     _structure_model_settings,
 )
-from quantmind.knowledge import (
+from finsage.knowledge import (
     PaperStructureNodeDraft,
     PaperStructureTreeDraft,
 )
-from quantmind.preprocess import OutlineSignals
-from quantmind.preprocess.format import parse_pdf
+from finsage.preprocess import OutlineSignals
+from finsage.preprocess.format import parse_pdf
 from tests.paper_helpers import build_paper_result
 
 _FIXTURE = (
@@ -101,7 +101,7 @@ class PaperFlowBuildTests(unittest.IsolatedAsyncioTestCase):
         # PaperFlow binds an immutable copy.
         cfg.model = "mutated-after-bind"
 
-        with patch("quantmind.flows.paper.parse_pdf", new=parse_spy):
+        with patch("finsage.flows.paper.parse_pdf", new=parse_spy):
             tree_one = await flow.build(LocalFilePath(path=_FIXTURE))
             tree_two = await flow.build(LocalFilePath(path=_FIXTURE))
 
@@ -139,7 +139,7 @@ class PaperFlowBuildTests(unittest.IsolatedAsyncioTestCase):
         parse_spy = AsyncMock(side_effect=parse_pdf)
 
         flow = PaperFlow(PaperStructureCfg(), _structure_provider=provider)
-        with patch("quantmind.flows.paper.parse_pdf", new=parse_spy):
+        with patch("finsage.flows.paper.parse_pdf", new=parse_spy):
             with self.assertRaises(PaperStructureError):
                 await flow.build(LocalFilePath(path=_FIXTURE))
 
@@ -153,7 +153,7 @@ class PaperFlowBuildTests(unittest.IsolatedAsyncioTestCase):
         # or parse.
         flow = PaperFlow(BaseFlowCfg())
         with patch(
-            "quantmind.flows.paper.parse_pdf",
+            "finsage.flows.paper.parse_pdf",
             new=AsyncMock(side_effect=AssertionError("must not parse")),
         ):
             with self.assertRaises(NotImplementedError):
@@ -179,7 +179,7 @@ class AgentsStructureProviderTests(unittest.IsolatedAsyncioTestCase):
         )
         run_mock = AsyncMock(return_value=_fixture_draft())
         with patch(
-            "quantmind.flows.paper._structure.run_with_observability",
+            "finsage.flows.paper._structure.run_with_observability",
             new=run_mock,
         ):
             draft = await _AgentsPaperStructureProvider().structure(
@@ -209,7 +209,7 @@ class AgentsStructureProviderTests(unittest.IsolatedAsyncioTestCase):
             ]
         )
         with patch(
-            "quantmind.flows.paper._structure.run_with_observability",
+            "finsage.flows.paper._structure.run_with_observability",
             new=run_mock,
         ):
             draft = await _AgentsPaperStructureProvider().structure(
@@ -239,7 +239,7 @@ class AgentsStructureProviderTests(unittest.IsolatedAsyncioTestCase):
             await asyncio.sleep(10)
 
         with patch(
-            "quantmind.flows.paper._structure.run_with_observability",
+            "finsage.flows.paper._structure.run_with_observability",
             new=AsyncMock(side_effect=slow_run),
         ):
             with self.assertRaises(PaperStructureError):

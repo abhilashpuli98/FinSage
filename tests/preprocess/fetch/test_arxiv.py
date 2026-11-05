@@ -8,8 +8,8 @@ from unittest import mock
 import httpx
 import respx
 
-from quantmind.preprocess.fetch import arxiv as arxiv_mod
-from quantmind.preprocess.fetch.arxiv import (
+from finsage.preprocess.fetch import arxiv as arxiv_mod
+from finsage.preprocess.fetch.arxiv import (
     ArxivIdParseError,
     _extract_arxiv_id,
     fetch_arxiv,

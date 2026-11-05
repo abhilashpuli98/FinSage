@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import httpx
 import respx
 
-from quantmind.preprocess.fetch.http import (
+from finsage.preprocess.fetch.http import (
     FetchAttemptsExhausted,
     FetchPolicy,
     HttpFetcher,
@@ -48,7 +48,7 @@ class FetchUrlTests(unittest.IsolatedAsyncioTestCase):
             await fetch_url("https://example.com")
 
         sent_request = route.calls.last.request
-        self.assertIn("QuantMind", sent_request.headers["User-Agent"])
+        self.assertIn("FinSage", sent_request.headers["User-Agent"])
 
     async def test_max_bytes_overflow_raises(self):
         with respx.mock(assert_all_called=True) as router:
@@ -87,7 +87,7 @@ class FetchPolicyTests(unittest.IsolatedAsyncioTestCase):
         with (
             respx.mock(assert_all_called=True) as router,
             patch(
-                "quantmind.preprocess.fetch.http.asyncio.sleep",
+                "finsage.preprocess.fetch.http.asyncio.sleep",
                 new_callable=AsyncMock,
             ) as sleep,
         ):
@@ -116,7 +116,7 @@ class FetchPolicyTests(unittest.IsolatedAsyncioTestCase):
         with (
             respx.mock(assert_all_called=True) as router,
             patch(
-                "quantmind.preprocess.fetch.http.asyncio.sleep",
+                "finsage.preprocess.fetch.http.asyncio.sleep",
                 new_callable=AsyncMock,
             ) as sleep,
         ):
@@ -143,7 +143,7 @@ class FetchPolicyTests(unittest.IsolatedAsyncioTestCase):
         with (
             respx.mock(assert_all_called=True) as router,
             patch(
-                "quantmind.preprocess.fetch.http.asyncio.sleep",
+                "finsage.preprocess.fetch.http.asyncio.sleep",
                 new_callable=AsyncMock,
             ),
         ):
@@ -171,7 +171,7 @@ class FetchPolicyTests(unittest.IsolatedAsyncioTestCase):
         with (
             respx.mock(assert_all_called=True) as router,
             patch(
-                "quantmind.preprocess.fetch.http.asyncio.sleep",
+                "finsage.preprocess.fetch.http.asyncio.sleep",
                 new_callable=AsyncMock,
             ),
         ):
@@ -213,7 +213,7 @@ class FetchPolicyTests(unittest.IsolatedAsyncioTestCase):
         with (
             respx.mock(assert_all_called=True) as router,
             patch(
-                "quantmind.preprocess.fetch.http.asyncio.sleep",
+                "finsage.preprocess.fetch.http.asyncio.sleep",
                 new_callable=AsyncMock,
             ) as sleep,
         ):

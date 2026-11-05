@@ -29,10 +29,10 @@ import asyncio
 import sys
 from pathlib import Path
 
-from quantmind.configs import PaperStructureCfg
-from quantmind.configs.paper import LocalFilePath
-from quantmind.flows import PaperFlow
-from quantmind.utils.usage import usage_scope
+from finsage.configs import PaperStructureCfg
+from finsage.configs.paper import LocalFilePath
+from finsage.flows import PaperFlow
+from finsage.utils.usage import usage_scope
 
 # usage_scope works with any provider; swap in your model and set its API key.
 # OpenRouter accepts strict json_schema, so this run is one clean call. A
@@ -45,7 +45,7 @@ async def main(pdf_path: Path) -> None:
     """Build one paper structure tree and print the per-run usage of that flow."""
     flow = PaperFlow(PaperStructureCfg(model=_MODEL))
 
-    with usage_scope("quantmind.paper.structure") as run:
+    with usage_scope("finsage.paper.structure") as run:
         tree = await flow.build(LocalFilePath(path=pdf_path))
 
     print(f"built structure tree: {len(tree.nodes)} nodes")

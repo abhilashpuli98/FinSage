@@ -9,15 +9,15 @@ from unittest.mock import AsyncMock, patch
 
 from agents import ModelSettings
 
-from quantmind.configs import PaperSemanticCfg
-from quantmind.configs.paper import (
+from finsage.configs import PaperSemanticCfg
+from finsage.configs.paper import (
     ArxivIdentifier,
     DoiIdentifier,
     HttpUrl,
     LocalFilePath,
     RawText,
 )
-from quantmind.flows._paper_summary import (
+from finsage.flows._paper_summary import (
     PaperResearchCitationDraft,
     PaperResearchDraft,
     PaperResearchFindingDraft,
@@ -30,14 +30,14 @@ from quantmind.flows._paper_summary import (
     _summary_model_settings,
     _validate_research_draft,
 )
-from quantmind.flows.paper import (
+from finsage.flows.paper import (
     PaperFlow,
     UnsupportedContentTypeError,
     _build_summary,
     _fetch_paper_source,
 )
-from quantmind.knowledge import PaperCitationValidationError
-from quantmind.preprocess.fetch import Fetched, RawPaper
+from finsage.knowledge import PaperCitationValidationError
+from finsage.preprocess.fetch import Fetched, RawPaper
 from tests.paper_helpers import build_paper_result
 
 _FIXTURE = (
@@ -135,7 +135,7 @@ class PaperFlowTests(unittest.IsolatedAsyncioTestCase):
             updated_at=_WHEN,
         )
         with patch(
-            "quantmind.flows.paper.fetch_arxiv",
+            "finsage.flows.paper.fetch_arxiv",
             new=AsyncMock(return_value=raw),
         ):
             result = await PaperFlow(
@@ -193,7 +193,7 @@ class SourceDispatchTests(unittest.IsolatedAsyncioTestCase):
             fetched_at=_WHEN,
         )
         with patch(
-            "quantmind.flows.paper.fetch_url",
+            "finsage.flows.paper.fetch_url",
             new=AsyncMock(return_value=raw),
         ):
             fetched = await _fetch_paper_source(
@@ -208,7 +208,7 @@ class SourceDispatchTests(unittest.IsolatedAsyncioTestCase):
     ) -> None:
         html = Fetched(bytes=b"<html/>", content_type="text/html")
         with patch(
-            "quantmind.flows.paper.fetch_url",
+            "finsage.flows.paper.fetch_url",
             new=AsyncMock(return_value=html),
         ):
             with self.assertRaises(UnsupportedContentTypeError):
@@ -384,7 +384,7 @@ class SummaryMapReduceTests(unittest.IsolatedAsyncioTestCase):
             )
         )
         with patch(
-            "quantmind.flows._paper_summary.run_with_observability",
+            "finsage.flows._paper_summary.run_with_observability",
             new=run_mock,
         ):
             draft = await _AgentsPaperSummaryProvider().summarize(
@@ -431,7 +431,7 @@ class SummaryMapReduceTests(unittest.IsolatedAsyncioTestCase):
             await asyncio.sleep(10)
 
         with patch(
-            "quantmind.flows._paper_summary.run_with_observability",
+            "finsage.flows._paper_summary.run_with_observability",
             new=AsyncMock(side_effect=fake_run),
         ):
             with self.assertRaises(PaperSummaryError):

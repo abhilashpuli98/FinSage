@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from quantmind.preprocess.fetch.local import read_local_file
+from finsage.preprocess.fetch.local import read_local_file
 
 
 class ReadLocalFileTests(unittest.IsolatedAsyncioTestCase):

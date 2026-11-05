@@ -7,8 +7,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from quantmind.knowledge import BaseKnowledge, Earnings, LegacyPaper, News
-from quantmind.library import LocalKnowledgeLibrary
+from finsage.knowledge import BaseKnowledge, Earnings, LegacyPaper, News
+from finsage.library import LocalKnowledgeLibrary
 
 _ROOT = Path(__file__).parents[2]
 _SOURCE_PATH = (

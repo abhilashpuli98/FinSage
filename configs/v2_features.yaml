@@ -1,0 +1,44 @@
+# FinSage v2 Feature Flags — all off by default
+# Existing pipeline is unaffected when all flags are false.
+v2_features:
+  probabilistic_tkus:      false   # Stage V2-1
+  agentic_retrieval:       false   # Stage V2-2
+  adversarial_robustness:  false   # Stage V2-3
+  temporal_graph_embed:    false   # Stage V2-4
+  bayesian_conflict:       false   # Stage V2-5
+  structured_api:          false   # Stage V2-6
+  counterfactual:          false   # Stage V2-7
+  multi_hop_reasoning:     false   # Stage V2-8
+
+v2_settings:
+  p_tku:
+    uncertainty_model: "gaussian"   # gaussian | laplace | student_t
+    min_confidence: 0.05
+    bayesian_update_prior: 0.5
+  agentic:
+    max_iterations: 3
+    gap_threshold: 0.6
+    reflection_model: "same"        # same = use existing LLMRouter
+  adversarial:
+    num_contradictions: 5
+    numeric_perturbation_pct: 0.15
+    red_team_iterations: 3
+  graph_embed:
+    embed_dim: 64
+    num_heads: 4
+    time_encoding: "sinusoidal"
+  bayesian:
+    prior_alpha: 2.0
+    prior_beta: 2.0
+    source_memory: 100
+  api:
+    host: "127.0.0.1"
+    port: 8001
+    enable_cors: true
+  counterfactual:
+    max_scenarios: 3
+    perturbation_depth: 2
+  multi_hop:
+    max_hops: 4
+    hop_k: 5
+    merge_strategy: "weighted_union"

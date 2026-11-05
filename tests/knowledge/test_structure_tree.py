@@ -5,7 +5,7 @@ import unittest
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from quantmind.knowledge import (
+from finsage.knowledge import (
     Citation,
     PaperStructureNodeDraft,
     PaperStructureProducer,
@@ -15,7 +15,7 @@ from quantmind.knowledge import (
     StructureTreeValidationError,
     TreeNode,
 )
-from quantmind.knowledge.paper import _paper_structure_content_hash
+from finsage.knowledge.paper import _paper_structure_content_hash
 from tests.paper_helpers import build_paper_result, build_paper_structure_tree
 
 

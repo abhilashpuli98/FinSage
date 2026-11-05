@@ -2,18 +2,19 @@ import json
 import sqlite3
 import unittest
 from collections.abc import Sequence
+from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import UUID
 
-from quantmind.knowledge import (
+from finsage.knowledge import (
     BaseKnowledge,
     Earnings,
     LegacyPaper,
     News,
     TreeKnowledge,
 )
-from quantmind.library import LocalKnowledgeLibrary, SemanticQuery
+from finsage.library import LocalKnowledgeLibrary, SemanticQuery
 
 _BUNDLE_PATH = (
     Path(__file__).parents[2]
@@ -117,7 +118,7 @@ class ExampleBundleSearchTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_prebuilt_bundle_searches_and_matches_source_json(self):
         self.assertTrue(_DATABASE_PATH.is_file())
-        with sqlite3.connect(_DATABASE_PATH) as db:
+        with closing(sqlite3.connect(_DATABASE_PATH)) as db, db:
             self.assertEqual(
                 db.execute("SELECT COUNT(*) FROM knowledge_items").fetchone()[
                     0

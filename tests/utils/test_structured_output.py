@@ -8,7 +8,7 @@ from agents import Agent, ModelSettings
 from openai import BadRequestError
 from pydantic import BaseModel
 
-from quantmind.utils.structured_output import (
+from finsage.utils.structured_output import (
     json_object_instructions,
     json_object_model_settings,
     run_structured,

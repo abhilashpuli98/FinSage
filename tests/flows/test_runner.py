@@ -1,4 +1,4 @@
-"""Tests for ``quantmind.flows._runner``."""
+"""Tests for ``finsage.flows._runner``."""
 
 import unittest
 from typing import Any
@@ -6,8 +6,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from agents import RunHooks
 
-from quantmind.configs import PaperSemanticCfg
-from quantmind.flows._runner import (
+from finsage.configs import PaperSemanticCfg
+from finsage.flows._runner import (
     _archive_run_artifacts,
     _collect_hooks,
     _compose_hooks,
@@ -135,7 +135,7 @@ class RunWithObservabilityTests(unittest.IsolatedAsyncioTestCase):
         fake_result = MagicMock()
         fake_result.final_output = "OUT"
         with patch(
-            "quantmind.flows._runner.Runner.run",
+            "finsage.flows._runner.Runner.run",
             new=AsyncMock(return_value=fake_result),
         ) as run_mock:
             out = await run_with_observability(
@@ -166,7 +166,7 @@ class RunWithObservabilityTests(unittest.IsolatedAsyncioTestCase):
         fake_result = MagicMock()
         fake_result.final_output = None
         with patch(
-            "quantmind.flows._runner.Runner.run",
+            "finsage.flows._runner.Runner.run",
             new=AsyncMock(return_value=fake_result),
         ) as run_mock:
             await run_with_observability(
@@ -174,7 +174,7 @@ class RunWithObservabilityTests(unittest.IsolatedAsyncioTestCase):
             )
         self.assertEqual(
             run_mock.await_args.kwargs["run_config"].workflow_name,
-            "quantmind.paper_extractor",
+            "finsage.paper_extractor",
         )
 
     async def test_extra_hooks_forwarded(self) -> None:
@@ -185,7 +185,7 @@ class RunWithObservabilityTests(unittest.IsolatedAsyncioTestCase):
         fake_result.final_output = None
         hook = _RecordingHooks("a", [])
         with patch(
-            "quantmind.flows._runner.Runner.run",
+            "finsage.flows._runner.Runner.run",
             new=AsyncMock(return_value=fake_result),
         ) as run_mock:
             await run_with_observability(

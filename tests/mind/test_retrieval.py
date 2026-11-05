@@ -16,10 +16,10 @@ from uuid import uuid4
 import httpx
 from openai import BadRequestError
 
-from quantmind.configs import RetrievalCfg
-from quantmind.knowledge import PaperStructureTree, StructureTree
-from quantmind.mind import AgenticRetriever, RetrievalError, RetrievalEvidence
-from quantmind.mind.retrieval import (
+from finsage.configs import RetrievalCfg
+from finsage.knowledge import PaperStructureTree, StructureTree
+from finsage.mind import AgenticRetriever, RetrievalError, RetrievalEvidence
+from finsage.mind.retrieval import (
     _node_text,
     _RetrievalSelectionDraft,
     _serialize_structure,
@@ -58,7 +58,7 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
         run_mock = AsyncMock(return_value=_selection(self.leaf.node_id))
         cfg = RetrievalCfg(model="litellm/anthropic/test-model", max_turns=6)
 
-        with patch("quantmind.mind.retrieval.Runner.run", new=run_mock):
+        with patch("finsage.mind.retrieval.Runner.run", new=run_mock):
             evidence = await AgenticRetriever(cfg).retrieve(
                 self.tree,
                 "How does multi-head attention work?",
@@ -113,7 +113,7 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
 
         run_mock = AsyncMock(side_effect=fake_run)
 
-        with patch("quantmind.mind.retrieval.Runner.run", new=run_mock):
+        with patch("finsage.mind.retrieval.Runner.run", new=run_mock):
             evidence = await AgenticRetriever(RetrievalCfg()).retrieve(
                 self.tree,
                 "Find the attention evidence.",
@@ -129,7 +129,7 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
         )
         run_mock = AsyncMock(return_value=_selection(self.leaf.node_id))
 
-        with patch("quantmind.mind.retrieval.Runner.run", new=run_mock):
+        with patch("finsage.mind.retrieval.Runner.run", new=run_mock):
             evidence = await AgenticRetriever(cfg).retrieve(
                 self.tree,
                 "Find the attention evidence.",
@@ -165,7 +165,7 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
             ]
         )
 
-        with patch("quantmind.mind.retrieval.Runner.run", new=run_mock):
+        with patch("finsage.mind.retrieval.Runner.run", new=run_mock):
             evidence = await AgenticRetriever(cfg).retrieve(
                 self.tree,
                 "Find the attention evidence.",
@@ -203,7 +203,7 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
             side_effect=_bad_request("insufficient_quota: over your quota")
         )
 
-        with patch("quantmind.mind.retrieval.Runner.run", new=run_mock):
+        with patch("finsage.mind.retrieval.Runner.run", new=run_mock):
             with self.assertRaises(BadRequestError):
                 await AgenticRetriever(cfg).retrieve(
                     self.tree,
@@ -220,7 +220,7 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
             extra_instruction="Prefer the limitations discussion."
         )
 
-        with patch("quantmind.mind.retrieval.Runner.run", new=run_mock):
+        with patch("finsage.mind.retrieval.Runner.run", new=run_mock):
             await AgenticRetriever(cfg).retrieve(self.tree, "Find attention.")
 
         call = run_mock.await_args
@@ -233,7 +233,7 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
     ) -> None:
         run_mock = AsyncMock(return_value=_selection(self.root.node_id))
 
-        with patch("quantmind.mind.retrieval.Runner.run", new=run_mock):
+        with patch("finsage.mind.retrieval.Runner.run", new=run_mock):
             evidence = await AgenticRetriever(RetrievalCfg()).retrieve(
                 self.tree, "Summarize the whole paper."
             )
@@ -258,7 +258,7 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
         )
         run_mock = AsyncMock(return_value=_selection(self.leaf.node_id))
 
-        with patch("quantmind.mind.retrieval.Runner.run", new=run_mock):
+        with patch("finsage.mind.retrieval.Runner.run", new=run_mock):
             evidence = await AgenticRetriever(RetrievalCfg()).retrieve(
                 plain, "How does attention work?"
             )
@@ -271,7 +271,7 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
         self,
     ) -> None:
         run_mock = AsyncMock(return_value=_selection(self.leaf.node_id))
-        with patch("quantmind.mind.retrieval.Runner.run", new=run_mock):
+        with patch("finsage.mind.retrieval.Runner.run", new=run_mock):
             await AgenticRetriever(RetrievalCfg()).retrieve(
                 self.tree,
                 "Find attention.",
@@ -283,7 +283,7 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(payload["seed_node_ids"], [str(self.leaf.node_id)])
 
         with patch(
-            "quantmind.mind.retrieval.Runner.run",
+            "finsage.mind.retrieval.Runner.run",
             new=AsyncMock(),
         ) as rejected_run:
             with self.assertRaisesRegex(
@@ -300,7 +300,7 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
         self,
     ) -> None:
         with patch(
-            "quantmind.mind.retrieval.Runner.run",
+            "finsage.mind.retrieval.Runner.run",
             new=AsyncMock(return_value=_selection(uuid4())),
         ):
             with self.assertRaisesRegex(ValueError, "unknown structure node"):
@@ -310,7 +310,7 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
 
         all_ids = [node.node_id for node in self.tree.walk_dfs()]
         with patch(
-            "quantmind.mind.retrieval.Runner.run",
+            "finsage.mind.retrieval.Runner.run",
             new=AsyncMock(return_value=_selection(*all_ids)),
         ):
             with self.assertRaisesRegex(RetrievalError, "max_evidence_nodes"):
@@ -327,7 +327,7 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
             await asyncio.sleep(10)
 
         with patch(
-            "quantmind.mind.retrieval.Runner.run",
+            "finsage.mind.retrieval.Runner.run",
             new=AsyncMock(side_effect=slow_run),
         ):
             with self.assertRaisesRegex(RetrievalError, "timeout_seconds"):
@@ -345,7 +345,7 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
 
         all_ids = [node.node_id for node in self.tree.walk_dfs()]
         with patch(
-            "quantmind.mind.retrieval.Runner.run",
+            "finsage.mind.retrieval.Runner.run",
             new=AsyncMock(return_value=_selection(*all_ids)),
         ):
             with self.assertRaisesRegex(RetrievalError, "max_evidence_nodes"):

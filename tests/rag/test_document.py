@@ -3,8 +3,8 @@
 import unittest
 from pathlib import Path
 
-from quantmind.preprocess.format import parse_pdf
-from quantmind.rag import (
+from finsage.preprocess.format import parse_pdf
+from finsage.rag import (
     SentenceSplitterConfig,
     chunk_parsed_document,
     retrieve_parsed_document,

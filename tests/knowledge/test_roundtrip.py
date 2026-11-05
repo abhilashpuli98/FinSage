@@ -10,7 +10,7 @@ import unittest
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from quantmind.knowledge import (
+from finsage.knowledge import (
     Earnings,
     ExtractionRef,
     Factor,

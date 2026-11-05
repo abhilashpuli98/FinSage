@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# QuantMind Deterministic Verification Harness — single fast-fail command.
+# FinSage Deterministic Verification Harness — single fast-fail command.
 #
 # Run before pushing; required CI runs the same script
 # (.github/workflows/ci.yml).

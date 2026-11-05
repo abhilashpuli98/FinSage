@@ -7,7 +7,7 @@ the subject line is not a Conventional Commit or contains CJK characters.
 
 Stdlib-only and network-free, so it runs identically for a human, for Claude
 Code, and for Codex (each spawns git, which invokes this hook). The accepted
-type set mirrors ``.claude/skills/quantmind-dev/references/commit.md``; update
+type set mirrors ``.claude/skills/finsage-dev/references/commit.md``; update
 that canonical reference and this list together.
 """
 
@@ -72,7 +72,7 @@ def main() -> int:
     for err in errors:
         print(f"  - {err}", file=sys.stderr)
     print(
-        "See .claude/skills/quantmind-dev/references/commit.md. "
+        "See .claude/skills/finsage-dev/references/commit.md. "
         "Fix the message and commit again; do not bypass with --no-verify.",
         file=sys.stderr,
     )

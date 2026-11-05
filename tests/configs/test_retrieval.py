@@ -4,7 +4,7 @@ import unittest
 
 from pydantic import ValidationError
 
-from quantmind.configs import RetrievalCfg
+from finsage.configs import RetrievalCfg
 
 
 class RetrievalCfgTests(unittest.TestCase):

@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from pydantic import ValidationError
 
-from quantmind.knowledge._base import (
+from finsage.knowledge._base import (
     BaseKnowledge,
     Citation,
     ExtractionRef,
@@ -190,7 +190,7 @@ class BaseKnowledgeTests(unittest.TestCase):
 
 class PackageExportTests(unittest.TestCase):
     def test_top_level_imports(self):
-        from quantmind.knowledge import (
+        from finsage.knowledge import (
             BaseKnowledge,
             Citation,
             Earnings,

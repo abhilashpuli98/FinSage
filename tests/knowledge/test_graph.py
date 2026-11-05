@@ -2,8 +2,8 @@
 
 import unittest
 
-from quantmind.knowledge._base import BaseKnowledge
-from quantmind.knowledge._graph import GraphKnowledge
+from finsage.knowledge._base import BaseKnowledge
+from finsage.knowledge._graph import GraphKnowledge
 
 
 class GraphKnowledgePlaceholderTests(unittest.TestCase):

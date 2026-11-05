@@ -1,4 +1,4 @@
-"""Tests for ``quantmind.magic``."""
+"""Tests for ``finsage.magic``."""
 
 import io
 import json
@@ -10,14 +10,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from pydantic import BaseModel
 
-from quantmind.configs import (
+from finsage.configs import (
     NewsCollectionCfg,
     NewsWindow,
     PaperSemanticCfg,
 )
-from quantmind.configs.paper import ArxivIdentifier, PaperInput
-from quantmind.flows import collect_news
-from quantmind.magic import (
+from finsage.configs.paper import ArxivIdentifier, PaperInput
+from finsage.flows import collect_news
+from finsage.magic import (
     ResolvedFlowConfig,
     _introspect_flow_signature,
     _pydantic_schema_str,
@@ -146,9 +146,9 @@ class ResolveMagicInputTests(unittest.IsolatedAsyncioTestCase):
         fake_result = MagicMock()
         fake_result.final_output = resolved
         with (
-            patch("quantmind.magic.Agent", side_effect=_capture_agent),
+            patch("finsage.magic.Agent", side_effect=_capture_agent),
             patch(
-                "quantmind.magic.Runner.run",
+                "finsage.magic.Runner.run",
                 new=AsyncMock(return_value=fake_result),
             ),
         ):
@@ -177,9 +177,9 @@ class ResolveMagicInputTests(unittest.IsolatedAsyncioTestCase):
         fake_result.final_output = resolved
         template = "FLOW={flow_name} INPUT={input_schema} CFG={cfg_schema}"
         with (
-            patch("quantmind.magic.Agent", side_effect=_capture_agent),
+            patch("finsage.magic.Agent", side_effect=_capture_agent),
             patch(
-                "quantmind.magic.Runner.run",
+                "finsage.magic.Runner.run",
                 new=AsyncMock(return_value=fake_result),
             ),
         ):
@@ -208,9 +208,9 @@ class ResolveMagicInputTests(unittest.IsolatedAsyncioTestCase):
         fake_result = MagicMock()
         fake_result.final_output = resolved
         with (
-            patch("quantmind.magic.Agent", side_effect=_capture_agent),
+            patch("finsage.magic.Agent", side_effect=_capture_agent),
             patch(
-                "quantmind.magic.Runner.run",
+                "finsage.magic.Runner.run",
                 new=AsyncMock(return_value=fake_result),
             ),
         ):
@@ -231,9 +231,9 @@ class PreviewResolveTests(unittest.IsolatedAsyncioTestCase):
         fake_result = MagicMock()
         fake_result.final_output = resolved
         with (
-            patch("quantmind.magic.Agent", return_value=MagicMock()),
+            patch("finsage.magic.Agent", return_value=MagicMock()),
             patch(
-                "quantmind.magic.Runner.run",
+                "finsage.magic.Runner.run",
                 new=AsyncMock(return_value=fake_result),
             ),
         ):

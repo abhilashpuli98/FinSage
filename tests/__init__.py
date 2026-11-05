@@ -1,1 +1,1 @@
-"""Test package for QuantMind."""
+"""Test package for FinSage."""

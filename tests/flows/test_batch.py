@@ -1,12 +1,12 @@
-"""Tests for ``quantmind.flows.batch``."""
+"""Tests for ``finsage.flows.batch``."""
 
 import asyncio
 import unittest
 from typing import Any
 
-from quantmind.configs import PaperSemanticCfg
-from quantmind.configs.paper import RawText
-from quantmind.flows.batch import BatchResult, batch_run
+from finsage.configs import PaperSemanticCfg
+from finsage.configs.paper import RawText
+from finsage.flows.batch import BatchResult, batch_run
 
 
 class BatchResultPropertiesTests(unittest.TestCase):

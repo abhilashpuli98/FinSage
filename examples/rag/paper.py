@@ -3,8 +3,8 @@
 import asyncio
 from pathlib import Path
 
-from quantmind.preprocess.format import parse_pdf
-from quantmind.rag import chunk_parsed_document, retrieve_parsed_document
+from finsage.preprocess.format import parse_pdf
+from finsage.rag import chunk_parsed_document, retrieve_parsed_document
 
 
 async def main() -> None:
