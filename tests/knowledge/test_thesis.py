@@ -1,0 +1,30 @@
+"""Tests for knowledge.thesis (stub schema)."""
+
+import unittest
+from datetime import datetime, timezone
+
+from finsage.knowledge._base import SourceRef
+from finsage.knowledge.thesis import Thesis
+
+
+def _now() -> datetime:
+    return datetime(2026, 4, 27, tzinfo=timezone.utc)
+
+
+def _src() -> SourceRef:
+    return SourceRef(kind="manual")
+
+
+class ThesisTests(unittest.TestCase):
+    def test_minimal(self):
+        t = Thesis(as_of=_now(), source=_src(), claim="USD weakens in H2 2026")
+        self.assertEqual(t.item_type, "thesis")
+        self.assertEqual(t.claim, "USD weakens in H2 2026")
+
+    def test_retrieval_projection_is_not_a_domain_method(self):
+        t = Thesis(as_of=_now(), source=_src(), claim="rates higher for longer")
+        self.assertFalse(hasattr(t, "embedding_text"))
+
+
+if __name__ == "__main__":
+    unittest.main()

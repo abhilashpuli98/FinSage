@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# FinSage Deterministic Verification Harness — single fast-fail command.
+#
+# Run before pushing; required CI runs the same script
+# (.github/workflows/ci.yml).
+# Steps execute in order; the first failure stops the loop.
+#
+# Steps:
+#   1. ruff format --check    formatting must be clean
+#   2. ruff check             lint must pass
+#   3. basedpyright           type check must pass
+#   4. lint-imports           architectural boundary contracts must hold
+#   5. pytest --cov           tests + coverage floor (configured in pyproject)
+
+set -euo pipefail
+
+# Prefer the project venv over global tools so the same versions run locally
+# and in pre-commit / pre-push hooks (which spawn fresh shells without an
+# activated venv). CI provisions its own venv before invoking this script.
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [ -d "$REPO_ROOT/.venv/bin" ]; then
+    export PATH="$REPO_ROOT/.venv/bin:$PATH"
+fi
+
+echo "==> [1/5] ruff format --check"
+ruff format --check .
+
+echo "==> [2/5] ruff check"
+ruff check .
+
+echo "==> [3/5] basedpyright"
+basedpyright
+
+echo "==> [4/5] lint-imports"
+lint-imports
+
+echo "==> [5/5] pytest --cov"
+pytest
+
+echo
+echo "[OK] verify loop passed"

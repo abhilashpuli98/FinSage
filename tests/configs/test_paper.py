@@ -1,0 +1,75 @@
+"""Tests for configs.paper."""
+
+import unittest
+from pathlib import Path
+
+from pydantic import TypeAdapter, ValidationError
+
+from finsage.configs.paper import (
+    ArxivIdentifier,
+    DoiIdentifier,
+    HttpUrl,
+    LocalFilePath,
+    PaperInput,
+    PaperSemanticCfg,
+    RawText,
+)
+
+
+class PaperSemanticCfgTests(unittest.TestCase):
+    def test_defaults(self):
+        cfg = PaperSemanticCfg()
+        self.assertEqual(cfg.model, "gpt-5.6-luna")
+        self.assertEqual(cfg.max_turns, 16)
+        self.assertEqual(cfg.chunk_size, 512)
+        self.assertEqual(cfg.chunk_overlap, 64)
+        self.assertEqual(cfg.summary_research_group_size, 8)
+        self.assertEqual(cfg.summary_concurrency, 4)
+        self.assertEqual(cfg.max_summary_output_tokens, 4_096)
+        self.assertEqual(cfg.min_summary_citations, 3)
+        self.assertEqual(cfg.min_summary_pages, 2)
+
+    def test_invalid_overlap_or_coverage_bounds_are_rejected(self):
+        with self.assertRaises(ValidationError):
+            PaperSemanticCfg(chunk_size=64, chunk_overlap=64)
+        with self.assertRaises(ValidationError):
+            PaperSemanticCfg(min_summary_citations=1, min_summary_pages=2)
+
+
+class PaperInputDiscriminatedTests(unittest.TestCase):
+    def setUp(self):
+        self.adapter = TypeAdapter(PaperInput)
+
+    def test_arxiv_round_trip(self):
+        v = self.adapter.validate_python({"type": "arxiv", "id": "2604.12345"})
+        self.assertIsInstance(v, ArxivIdentifier)
+        self.assertEqual(v.id, "2604.12345")
+
+    def test_http(self):
+        v = self.adapter.validate_python(
+            {"type": "http", "url": "https://example.com/p.pdf"}
+        )
+        self.assertIsInstance(v, HttpUrl)
+
+    def test_local(self):
+        v = self.adapter.validate_python(
+            {"type": "local", "path": "/tmp/p.pdf"}
+        )
+        self.assertIsInstance(v, LocalFilePath)
+        self.assertEqual(v.path, Path("/tmp/p.pdf"))
+
+    def test_text(self):
+        v = self.adapter.validate_python({"type": "text", "text": "hello"})
+        self.assertIsInstance(v, RawText)
+
+    def test_doi(self):
+        v = self.adapter.validate_python({"type": "doi", "doi": "10.1000/xyz"})
+        self.assertIsInstance(v, DoiIdentifier)
+
+    def test_unknown_type_rejected(self):
+        with self.assertRaises(ValidationError):
+            self.adapter.validate_python({"type": "ftp", "url": "x"})
+
+
+if __name__ == "__main__":
+    unittest.main()

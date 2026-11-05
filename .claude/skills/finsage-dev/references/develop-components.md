@@ -1,0 +1,226 @@
+# Component Development Workflow
+
+How to implement or refactor code under `finsage/`. Read this before
+writing code; the architecture constraints in root `AGENTS.md` / `CLAUDE.md`
+apply throughout.
+
+## General Loop
+
+1. **Find the nearest existing pattern.** Locate the closest analogous
+   implementation in the target module and follow its structure, naming,
+   and test layout. Consistency beats novelty.
+2. **Check the dependency contract** for your module (table below) before
+   adding any import. `lint-imports` enforces these; if your design needs a
+   forbidden import, the design is wrong — restructure, do not work around
+   the contract.
+3. **Implement small and flat.** Use functions for self-contained stateless
+   transformations. Use a small service class to bind, at construction, the
+   immutable `cfg`/policy/dependency that must stay constant across calls; the
+   operand is passed per call. Binding `cfg` for batch reproducibility alone
+   justifies a class (`PaperFlow(cfg).build(input)`,
+   `AgenticRetriever(cfg).retrieve(...)`), and the cfg *type* may select the
+   shape/strategy (typed dispatch, not a hierarchy). Do not add a class only as a
+   namespace, and do not store an implicit mutable "current input" or "current
+   result". Use `Protocol` over ABC and avoid framework-style class hierarchies.
+   No meaningless wrappers (a method must add logic, abstraction, or a side effect
+   beyond the call it wraps). No premature abstractions — extract shared code when
+   the second real caller appears, not before.
+4. **Add the unit test and the example** (sections below).
+5. **Update the public surface** if needed: package exports, the relevant
+   design or guide, and the catalog in `docs/README.md`. Update the root
+   README only when its overview or quick start changes.
+6. **Verify**: run targeted tests while iterating, deterministic required
+   verification before handoff, and every applicable live-network component
+   smoke test for changed public-network integrations.
+
+## Module Routing
+
+### Dependency contracts (enforced by import-linter)
+
+| Module | May import from `finsage.*` |
+|--------|-------------------------------|
+| `finsage/etl/` | nothing (independent leaf) |
+| `finsage/utils/` | nothing (leaf) |
+| `finsage/knowledge/` | nothing (leaf) |
+| `finsage/configs/` | `knowledge` only |
+| `finsage/preprocess/` | `utils` only |
+| `finsage/rag/` | `preprocess` only |
+| `finsage/library/` | `knowledge` only |
+| `finsage/mind/` | `knowledge`, `configs`, `utils` (retrieval is library-free; the `library` edge is reserved for the future collection path, not single-tree `retrieve`) |
+| `finsage/flows/`, `finsage/magic.py` | apex — may import domain layers above, but not the independent `etl` scaffold |
+
+### `finsage/etl/` — observable whole-run and micro-batch ETL
+
+- Bind exactly three async stage callables to `ETLPipeline` for one whole-run
+  delivery. Use the parallel `BatchETLPipeline` when an async producer yields
+  business batches that each pass through transform and load. Never switch
+  execution shape by inspecting a callable's return value, and never hide batch
+  loads inside a whole-run transform.
+- Use composition rather than an ABC, subclass tree, or inheritance between the
+  two pipeline classes. Keep batch execution strictly serial unless a later
+  observation contract explicitly represents simultaneously active stages.
+- Keep it independent of every other `finsage.*` package. Existing flows do
+  not inherit it; their pure `input → artifact` contract remains unchanged.
+- Report only real completed work through `PipelineContext.progress()`. In batch
+  mode, only a load that returns successfully increments the completed-batch
+  count; partial-write safety remains the business load's responsibility. The
+  scaffold owns its local lifecycle snapshots; do not add custom run-state
+  files, a CLI, heartbeat, scheduler, retry policy, checkpoint/resume, or
+  workflow engine. See `contexts/design/operations/etl.md`.
+
+### `finsage/knowledge/` — data standard
+
+- Pydantic models, `frozen=True`, `extra="forbid"`.
+- Every `BaseKnowledge` subclass **must** require `as_of: datetime`
+  (financial time-sensitivity is mandatory) and a typed `source: SourceRef`
+  (no bare strings).
+- Canonical models do not select retrieval text or store vectors. Put
+  rebuildable text projections in `finsage.library`.
+- Pick one shape: `FlattenKnowledge` (atomic card), `TreeKnowledge`
+  (hierarchical artifact), or `GraphKnowledge` (placeholder) for conventional
+  knowledge. Source-first paper revisions and independently versioned paper
+  artifacts use their dedicated frozen models instead of `BaseKnowledge`.
+
+### `finsage/configs/` — operation cfg + typed inputs
+
+- Extend `BaseFlowCfg`; inputs are Pydantic models or discriminated unions.
+- Never `Dict[str, Any]` in signatures — model it.
+
+### `finsage/preprocess/` — deterministic data prep
+
+- Fetch / format / clean / time utilities: deterministic, no LLM calls.
+- Return frozen dataclasses (`Fetched`, `RawPaper`, ...), not dicts.
+- Surface the common path at the package root (`from finsage.preprocess
+  import fetch_arxiv`), keep explicit submodule paths working.
+
+### `finsage/rag/` — opinionated document RAG
+
+- Use LlamaIndex for chunking, indexing, retrieval, and ranking; add only the
+  source/page/provenance conversion that FinSage owns.
+- Import deterministic inputs from `finsage.preprocess`; preprocessing must
+  never import RAG.
+- Keep LlamaIndex types private. Return frozen FinSage evidence values.
+- Do not add a public retriever, vector-store, provider, backend registry, or
+  generic query-engine hierarchy.
+
+### `finsage/flows/` and `finsage/magic.py` — apex layer
+
+- Public operations are intent-oriented async callables. Prefer a function for a
+  one-off transform; use a config-bound service class when a batch must run under
+  one fixed setting — bind `cfg` at construction (`PaperFlow(cfg)`), pass only the
+  operand per call (`build(input)`), and let the cfg *type* select the knowledge
+  shape. Instances must not hide the active input or result as mutable state, and
+  side effects stay explicit.
+- **A pipeline is pure processing: `input → self-contained artifact`.** It does
+  not bind a `library`, persist, or retrieve. Producing the artifact fully —
+  including any embeddings it carries — is the whole job. Persistence (`library`
+  dump/load) and retrieval (`mind`) are downstream steps the caller chooses.
+- Do not expose a half-finished intermediate (parse-only, source-only) as a
+  public flow; that is a component seam owned by `preprocess`/`rag`/`knowledge`.
+- Semantic operations use the OpenAI Agents SDK directly (`Agent`,
+  `@function_tool`, `output_type=`); deterministic operations do not add an
+  LLM. Never wrap `from agents import ...` in a facade.
+- Fan-out goes through `batch_run` (bounded concurrency, error policy);
+  `batch_run` rejects `memory=` at the signature layer by design.
+
+### `finsage/library/` — local persistence and semantic retrieval
+
+- Persist canonical knowledge and derived artifacts; dump and load, do not
+  transform. A self-contained artifact (e.g. a structure tree carrying its own
+  node text and any embeddings) round-trips through `put` / `open_*` to an
+  identical value. Do not make one artifact's content depend on refilling from
+  another at read time.
+- Keep SQLite and LlamaIndex types private; import from `knowledge` only.
+- Do not add a vector-store, retriever, provider, or backend registry.
+
+### `finsage/mind/` — cognitive layer
+
+- **Memory**: backends implement the `Memory` Protocol with granular `tools()`,
+  `mcp_servers()`, `run_hooks()`, `reset()` — each may return an empty list; do
+  not force MCP on every implementation.
+- **Retrieval (pure agentic)**: `AgenticRetriever(RetrievalCfg)` reasons over one
+  **self-contained** structure (`Retrievable`, a `StructureTree` today) with an
+  LLM agent and returns `RetrievalEvidence` values whose `content` comes from the
+  structure — no `library`, no query-time refill. The `locator` field is optional
+  provenance for cross-artifact fusion, never the path to the content. `mind` is
+  the **reasoning** layer; **mechanical** retrieval (semantic vector search /
+  BM25) is `finsage.library` / `finsage.rag`, and a future hybrid path
+  composes them (a semantic shortlist seeding this reasoning pass). Use the Agents
+  SDK directly (`Agent`, `@function_tool`, `output_type=`, its own `RunConfig`);
+  do not import `flows._runner`, and do not build a retriever/query-engine
+  hierarchy — one agentic strategy, no strategy registry. See
+  `contexts/design/mind/retrieval.md`.
+
+### `finsage/utils/`
+
+- The logger, plus small dependency-free helpers that wrap an Agents SDK
+  seam and must be shared across layers without one importing another
+  (`structured_output`, `usage`). New helpers still need maintainer
+  sign-off via an issue first; the default answer is "put it in the module
+  that uses it".
+
+## Public Operation Checklist
+
+A public operation is complete only when all of these agree:
+
+1. A stage and name consistent with `contexts/design/operations/naming.md`.
+2. Typed input and config models, when the operation has them, exported from
+   the canonical owning package (`finsage.configs` for flow configs,
+   `finsage.etl` for ETL run contracts, or another explicit owner).
+3. One intent-oriented async function, small service class, or document-scoped
+   handle exported from its canonical owning package (`finsage.flows`,
+   `finsage.etl`, `finsage.library`, etc.), with its result contract
+   exported from the same owning layer.
+4. Offline success and failure tests for the public callable, plus a
+   magic-introspection test when a function follows the `(input, *, cfg)`
+   convention.
+5. One runnable common-path example under `examples/<module>/`.
+6. A relevant design or guide and one row in `docs/README.md`.
+
+Do not add a registry solely for discovery; package exports and the component
+catalog are the discovery surfaces.
+
+## Public-Network Source Checklist
+
+When adding a source to an existing operation:
+
+1. Update the typed source selection and the operation's direct dispatch.
+2. Keep acquisition policy internal. Add a shared provider abstraction only
+   after a second implementation demonstrates shared behavior.
+3. Add offline mocked tests for parsing, boundaries, continuation after item
+   failures, and completeness semantics.
+4. Update the source table and design under `docs/`.
+5. Add or update a component-specific
+   `scripts/verify_<component>_e2e.py` and list its command in
+   `docs/README.md`.
+6. Add or update the component's named job in the existing
+   `.github/workflows/e2e.yml` and extend the workflow's precise pull-request
+   path filter. When multiple live jobs exist, use GitHub-native per-job change
+   detection so only affected component jobs run. Do not add a separate
+   workflow, generic runner or registry, or base E2E class. Keep live network
+   work out of `scripts/verify.sh`.
+
+## Tests
+
+Follow the canonical [test standard](tests.md) before writing tests: where they
+live, the offline-and-deterministic default suite, the change→test obligations,
+and how live behavior goes in a `scripts/verify_<component>_e2e.py` slice rather
+than a unit test. In short: mirror the module at `tests/<module>/test_<topic>.py`,
+mock across boundaries so the suite passes offline, cover a success path **and**
+a failure path per public function, and keep branch coverage from dropping (the
+`pytest --cov` floor in `scripts/verify.sh`).
+
+## Examples
+
+- One focused example per new feature under `examples/<module>/`
+  (create the directory if it does not exist yet).
+- Demo the simple, common usage — one scenario per file, runnable as
+  `python examples/<module>/<name>.py`, minimal setup.
+
+## Documentation
+
+- Docstrings: English, Google style, required on public functions and
+  models.
+- Public behavior changes update the relevant design or guide and the catalog
+  in `docs/README.md`. Update the root README only for top-level positioning
+  or quick-start changes.

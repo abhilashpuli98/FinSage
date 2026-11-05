@@ -1,0 +1,219 @@
+name: e2e
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - '.github/workflows/e2e.yml'
+      - 'scripts/verify_news_e2e.py'
+      - 'finsage/preprocess/_news_types.py'
+      - 'finsage/preprocess/clean.py'
+      - 'finsage/preprocess/news.py'
+      - 'finsage/preprocess/pr_newswire.py'
+      - 'finsage/preprocess/time.py'
+      - 'finsage/preprocess/format/html.py'
+      - 'finsage/preprocess/fetch/__init__.py'
+      - 'finsage/preprocess/fetch/_types.py'
+      - 'finsage/preprocess/fetch/http.py'
+      - 'finsage/preprocess/fetch/rss.py'
+      - 'finsage/preprocess/fetch/arxiv.py'
+      - 'finsage/preprocess/format/pdf.py'
+      - 'finsage/rag/**'
+      - 'finsage/configs/paper.py'
+      - 'finsage/flows/_paper_summary.py'
+      - 'finsage/flows/paper.py'
+      - 'finsage/knowledge/paper.py'
+      - 'finsage/library/**'
+      - 'scripts/verify_pdf_rag_e2e.py'
+      - 'scripts/verify_structure_e2e.py'
+      - 'finsage/mind/**'
+      - 'finsage/configs/retrieval.py'
+      - 'finsage/configs/structure.py'
+      - 'finsage/flows/paper/**'
+      - 'finsage/preprocess/outline.py'
+      - 'finsage/utils/structured_output.py'
+      - 'pyproject.toml'
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      news: ${{ steps.filter.outputs.news }}
+      paper_semantic: ${{ steps.filter.outputs.paper_semantic }}
+      structure: ${{ steps.filter.outputs.structure }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect component changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            news:
+              - '.github/workflows/e2e.yml'
+              - 'scripts/verify_news_e2e.py'
+              - 'finsage/preprocess/_news_types.py'
+              - 'finsage/preprocess/clean.py'
+              - 'finsage/preprocess/news.py'
+              - 'finsage/preprocess/pr_newswire.py'
+              - 'finsage/preprocess/time.py'
+              - 'finsage/preprocess/format/html.py'
+              - 'finsage/preprocess/fetch/**'
+              - 'pyproject.toml'
+            paper_semantic:
+              - '.github/workflows/e2e.yml'
+              - 'scripts/verify_pdf_rag_e2e.py'
+              - 'finsage/configs/paper.py'
+              - 'finsage/flows/_paper_summary.py'
+              - 'finsage/flows/paper/**'
+              - 'finsage/knowledge/paper.py'
+              - 'finsage/library/**'
+              - 'finsage/preprocess/fetch/arxiv.py'
+              - 'finsage/preprocess/format/pdf.py'
+              - 'finsage/rag/**'
+              - 'pyproject.toml'
+            structure:
+              - '.github/workflows/e2e.yml'
+              - 'scripts/verify_structure_e2e.py'
+              - 'finsage/mind/**'
+              - 'finsage/configs/retrieval.py'
+              - 'finsage/configs/structure.py'
+              - 'finsage/flows/paper/**'
+              - 'finsage/knowledge/paper.py'
+              - 'finsage/knowledge/_tree.py'
+              - 'finsage/library/**'
+              - 'finsage/preprocess/outline.py'
+              - 'finsage/preprocess/format/pdf.py'
+              - 'finsage/utils/structured_output.py'
+              - 'pyproject.toml'
+
+  news:
+    needs: changes
+    if: github.event_name != 'pull_request' || needs.changes.outputs.news == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Create virtual environment
+        run: uv venv
+
+      - name: Install project runtime dependencies
+        run: uv sync --frozen
+
+      - name: Run live news E2E
+        run: .venv/bin/python scripts/verify_news_e2e.py
+
+  paper-flow:
+    needs: changes
+    if: github.event_name != 'pull_request' || needs.changes.outputs.paper_semantic == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Create virtual environment
+        run: uv venv
+
+      - name: Install project runtime dependencies
+        run: uv sync --frozen
+
+      - name: Check OpenAI credential
+        id: openai
+        shell: bash
+        run: |
+          if [[ -n "${OPENAI_API_KEY}" ]]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping Paper Flow V1 E2E because OPENAI_API_KEY is not configured."
+          fi
+
+      - name: Run live Paper Flow V1 E2E
+        if: steps.openai.outputs.available == 'true'
+        run: .venv/bin/python scripts/verify_pdf_rag_e2e.py
+
+  structure:
+    needs: changes
+    if: github.event_name != 'pull_request' || needs.changes.outputs.structure == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Create virtual environment
+        run: uv venv
+
+      - name: Install project runtime dependencies
+        run: uv sync --frozen
+
+      - name: Check OpenRouter credential
+        id: openrouter
+        shell: bash
+        run: |
+          if [[ -n "${OPENROUTER_API_KEY}" ]]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping structure-retrieval E2E because OPENROUTER_API_KEY is not configured."
+          fi
+
+      - name: Run live structure-retrieval E2E
+        if: steps.openrouter.outputs.available == 'true'
+        run: .venv/bin/python scripts/verify_structure_e2e.py

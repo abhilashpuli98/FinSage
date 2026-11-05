@@ -1,0 +1,57 @@
+"""Tests for knowledge.earnings."""
+
+import unittest
+from datetime import datetime, timezone
+
+from finsage.knowledge._base import SourceRef
+from finsage.knowledge.earnings import Earnings
+
+
+def _now() -> datetime:
+    return datetime(2026, 4, 26, tzinfo=timezone.utc)
+
+
+def _src() -> SourceRef:
+    return SourceRef(kind="http", uri="https://ir.example.com/q1.pdf")
+
+
+class EarningsTests(unittest.TestCase):
+    def test_minimal(self):
+        e = Earnings(
+            as_of=_now(),
+            source=_src(),
+            ticker="AAPL",
+            period="2026Q1",
+        )
+        self.assertEqual(e.item_type, "earnings")
+        self.assertIsNone(e.revenue)
+        self.assertEqual(e.surprise_flags, [])
+
+    def test_full(self):
+        e = Earnings(
+            as_of=_now(),
+            source=_src(),
+            ticker="AAPL",
+            period="2026Q1",
+            revenue=120.0,
+            eps=1.55,
+            guidance="Raised FY revenue guide",
+            surprise_flags=["eps_beat", "revenue_beat"],
+            transcript_quote="Demand remains robust ...",
+        )
+        self.assertEqual(e.revenue, 120.0)
+        self.assertEqual(e.surprise_flags, ["eps_beat", "revenue_beat"])
+
+    def test_retrieval_projection_is_not_a_domain_method(self):
+        e = Earnings(
+            as_of=_now(),
+            source=_src(),
+            ticker="AAPL",
+            period="2026Q1",
+            guidance="Raised FY guide",
+        )
+        self.assertFalse(hasattr(e, "embedding_text"))
+
+
+if __name__ == "__main__":
+    unittest.main()
