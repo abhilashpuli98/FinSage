@@ -1,6 +1,6 @@
 # Commit Workflow
 
-How to commit work in the QuantMind repository.
+How to commit work in the FinSage repository.
 
 ## Message Format
 

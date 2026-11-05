@@ -2,7 +2,7 @@
 
 ## Quick Summary
 
-- **Purpose**: Select consistent labels for QuantMind issues and pull requests.
+- **Purpose**: Select consistent labels for FinSage issues and pull requests.
 - **Read when**: Creating, updating, triaging, or reviewing an issue or PR.
 - **Label count**: Use exactly one `type:` label, normally one `area:` label (at most two), and optional `impact:` labels.
 - **Selection rule**: Label the work's actual purpose and main area, not every file it touches.
@@ -53,13 +53,13 @@ Add `impact:` labels only when needed. Resolution and community labels do not co
 |---|---|
 | `area: contexts` | Repository information routing and discovery under `contexts/`. This does not mean all documentation. |
 | `area: harness` | Contributor and agent controls: `AGENTS.md`, `CLAUDE.md`, skills, CI, verification scripts, hooks, templates, and rulesets. |
-| `area: knowledge` | Knowledge models, stored formats, serialization, and representation under `quantmind/knowledge/`. |
-| `area: configs` | Typed inputs and configuration models under `quantmind/configs/`. |
-| `area: preprocess` | Fetching, parsing, cleaning, formatting, and source handling under `quantmind/preprocess/`. |
-| `area: rag` | Opinionated document chunking, indexing, and retrieval under `quantmind/rag/`. |
-| `area: flows` | Public operation implementations under `quantmind/flows/`. It is not a generic synonym for pipeline or orchestration. |
-| `area: mind` | Memory, tools, MCP integration, and agent reasoning under `quantmind/mind/`. |
-| `area: utils` | The narrowly owned utilities surface under `quantmind/utils/`. |
+| `area: knowledge` | Knowledge models, stored formats, serialization, and representation under `finsage/knowledge/`. |
+| `area: configs` | Typed inputs and configuration models under `finsage/configs/`. |
+| `area: preprocess` | Fetching, parsing, cleaning, formatting, and source handling under `finsage/preprocess/`. |
+| `area: rag` | Opinionated document chunking, indexing, and retrieval under `finsage/rag/`. |
+| `area: flows` | Public operation implementations under `finsage/flows/`. It is not a generic synonym for pipeline or orchestration. |
+| `area: mind` | Memory, tools, MCP integration, and agent reasoning under `finsage/mind/`. |
+| `area: utils` | The narrowly owned utilities surface under `finsage/utils/`. |
 | `area: examples` | Examples are the primary deliverable, rather than supporting files for another area. |
 | `area: packaging` | Installation, builds, dependencies, releases, and package metadata. |
 

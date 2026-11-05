@@ -1,4 +1,4 @@
-# QuantMind — Agent Instructions
+# FinSage — Agent Instructions
 
 Guidance for coding agents contributing to this repository. This file is the
 single source of repository instructions; `CLAUDE.md` imports it verbatim, so
@@ -25,37 +25,35 @@ disclosure:
 
 ## What This Is
 
-QuantMind is a knowledge extraction and retrieval library for quantitative
-finance, built **on top of** the OpenAI Agents SDK. It is a domain library,
-not an agent framework: runtime, tracing, tool scaffolding, and multi-agent
-handoff all come from `openai-agents`.
+FinSage is research software for financial knowledge extraction and retrieval. It uses Pydantic for typed artifacts, the OpenAI Agents SDK for agentic structure retrieval, and LiteLLM for knowledge-pipeline model routing. It is a domain library, not a general-purpose agent framework.
 
 ## Positioning
 
-QuantMind is an **agent-native workbench for financial knowledge extraction** —
+The original QuantMind project was an **agent-native workbench for financial knowledge extraction** —
 its primary consumer is a coding agent working inside this checkout, not only a
 human importing a package (workbench-first, library-second). Two engineering
 dimensions structure it: **context engineering** (any source → typed, cited,
 as-of-correct knowledge) and **harness engineering** (any agent → domain
 specialist, via this repo's contracts, `contexts/`, skills, hooks, and
 deterministic verify).
-The canonical, always-current statement lives in
-[`contexts/design/positioning.md`](contexts/design/positioning.md).
+Current FinSage positioning and implementation status live in
+[`contexts/design/positioning.md`](contexts/design/positioning.md) and the root README.
 
 ## Module Map
 
 | Module | Role |
 |--------|------|
-| `quantmind/etl/` | Stdlib-only, observable whole-run and micro-batch `extract → transform → load` authoring scaffolds — independent leaf |
-| `quantmind/knowledge/` | Pydantic data standard (`FlattenKnowledge` / `TreeKnowledge` / `GraphKnowledge`) — dependency leaf |
-| `quantmind/library/` | Local persistence and semantic retrieval for canonical knowledge — depends only on `knowledge` |
-| `quantmind/configs/` | Operation cfg + typed input models or unions (`BaseFlowCfg`, `NewsWindow`, `PaperInput`) — depends only on `knowledge` |
-| `quantmind/preprocess/` | Deterministic fetch / format / clean / time utilities — depends only on `utils` |
-| `quantmind/rag/` | Opinionated LlamaIndex document chunking and retrieval — depends only on `preprocess` |
-| `quantmind/flows/` | Apex layer: public library operations (`PaperFlow`, `collect_news`, `batch_run`) |
-| `quantmind/magic.py` | `resolve_magic_input`: natural language → `(input, cfg)` |
-| `quantmind/mind/` | Pure-agentic reasoning layer — memory + agentic (reasoning-based) retrieval where an LLM decides; mechanical retrieval (similarity / BM25) lives in `rag` / `library` |
-| `quantmind/utils/` | Logger only — keep it that way |
+| `finsage/etl/` | Stdlib-only, observable whole-run and micro-batch `extract → transform → load` authoring scaffolds — independent leaf |
+| `finsage/knowledge/` | Pydantic data standard (`FlattenKnowledge` / `TreeKnowledge` / `GraphKnowledge`) — dependency leaf |
+| `finsage/library/` | Local persistence and semantic retrieval for canonical knowledge — depends only on `knowledge` |
+| `finsage/configs/` | Operation cfg + typed input models or unions (`BaseFlowCfg`, `NewsWindow`, `PaperInput`) — depends only on `knowledge` |
+| `finsage/preprocess/` | Deterministic fetch / format / clean / time utilities — depends only on `utils` |
+| `finsage/rag/` | Opinionated LlamaIndex document chunking and retrieval — depends only on `preprocess` |
+| `finsage/flows/` | Apex layer: public library operations (`PaperFlow`, `collect_news`, `batch_run`) |
+| `finsage/evaluation/` | Benchmark construction and experimental evaluation utilities |
+| `finsage/magic.py` | `resolve_magic_input`: natural language → `(input, cfg)` |
+| `finsage/mind/` | Agentic structure retrieval, LLM routing, and conflict analysis; persistent cross-session memory is not integrated |
+| `finsage/utils/` | Shared logging, structured-output, and run-usage utilities |
 
 The pre-migration agent runtime was removed and archived on the
 `archive/agent-runtime-final` branch. Reference it for history; never
@@ -99,10 +97,10 @@ the user explicitly authorizes it — fix the underlying issue instead.
    free of runtime service state; use `Protocol` over ABC, with no
    framework-style class hierarchies, plugin registries, hook discovery, or CLI.
 2. **RAG data plane, not framework** — use LlamaIndex directly inside
-   `quantmind.rag`; keep upstream types private and do not add retriever,
+   `finsage.rag`; keep upstream types private and do not add retriever,
    vector-store, provider, or backend registries.
 3. **Do not rebuild the agent runtime** — use `openai-agents` directly; no
-   QuantMind-side facades over `from agents import ...`.
+   FinSage-side facades over `from agents import ...`.
 4. **Schema models vs runtime evidence** — user/LLM inputs and configs use
    extra-forbid Pydantic models; knowledge adds `frozen=True`; deterministic
    fetch, preprocessing, and collection values use frozen dataclasses when
@@ -133,11 +131,11 @@ the user explicitly authorizes it — fix the underlying issue instead.
    Half-finished intermediates stay component seams, not public flows. See
    `contexts/design/operations/orchestration.md`.
 10. **ETL execution stays separate from flows** — use
-    `quantmind.etl.ETLPipeline` for one whole-run delivery and
+    `finsage.etl.ETLPipeline` for one whole-run delivery and
     `BatchETLPipeline` for repeated business-batch deliveries. Call
     `ctx.progress()` in long loops so the next Agent can observe real completed
     work; do not write custom run-state files. Both are composition-based
-    authoring scaffolds, not base classes for `quantmind.flows`. See
+    authoring scaffolds, not base classes for `finsage.flows`. See
     `contexts/design/operations/etl.md`.
 
 ## Tests and Examples
@@ -148,7 +146,7 @@ A new feature ships with a unit test **and** a focused example:
   services, cover success and failure paths.
 - Examples: `examples/<module>/`, one simple usage per file.
 - Public operations and sources: update the catalog in `docs/README.md` and
-  follow the `quantmind-dev` component checklist.
+  follow the `finsage-dev` component checklist.
 
 ## Communication
 
@@ -162,10 +160,10 @@ A new feature ships with a unit test **and** a focused example:
 ## Development Workflows
 
 For commit, pull-request, or component-implementation tasks, load the
-`quantmind-dev` skill and follow the matching reference:
+`finsage-dev` skill and follow the matching reference:
 
-- `.agents/skills/quantmind-dev/SKILL.md` (Codex and other AGENTS.md-based tools)
-- `.claude/skills/quantmind-dev/SKILL.md` (Claude Code)
+- `.agents/skills/finsage-dev/SKILL.md` (Codex and other AGENTS.md-based tools)
+- `.claude/skills/finsage-dev/SKILL.md` (Claude Code)
 
 The two copies are identical; when changing the skill, update both in the
 same change.

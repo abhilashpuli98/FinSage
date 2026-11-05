@@ -2,7 +2,7 @@
 
 ## Quick Summary
 
-- **Purpose**: Define clear names for public QuantMind callables and their input, config, and result types.
+- **Purpose**: Define clear names for public FinSage callables and their input, config, and result types.
 - **Read when**: Adding or renaming a public function, service, operation type, or pipeline.
 - **Status**: Use these rules for new names. The legacy paper extraction function has been removed; the paper semantic build is now `PaperFlow(PaperSemanticCfg(...)).build(input)`, so no `*_flow` functions remain.
 - **Core rule**: Name a function or service method with a verb that says what it does. Use `pipeline` only when one callable combines several public operations. Do not use `flow` as a **verb**; `flow` as a **noun** naming a finished pipeline collection (`PaperFlow`) is allowed.
@@ -19,7 +19,7 @@
 
 ## Scope
 
-This page defines how to name public QuantMind functions and small service classes. It does not rename packages or existing callables. Any existing name change needs a separate plan for users who depend on the old name.
+This page defines how to name public FinSage functions and small service classes. It does not rename packages or existing callables. Any existing name change needs a separate plan for users who depend on the old name.
 
 The runtime library API is designed for Python callers. Repository guidance for coding agents belongs in `AGENTS.md`, skills, docs, fixtures, and checks; it does not belong in the runtime API.
 
@@ -30,7 +30,7 @@ Start a public function name with a verb that describes its result:
 | Work | Name pattern | What it does |
 |-------|--------------|----------------|
 | Collection | `collect_<domain>` | Fetch source documents and the details needed to verify them |
-| Knowledge extraction | `extract_<domain>_knowledge` | Turn documents into typed `quantmind.knowledge` values |
+| Knowledge extraction | `extract_<domain>_knowledge` | Turn documents into typed `finsage.knowledge` values |
 | Index construction | `build_<domain>_index` | Turn documents or knowledge into a search index |
 | Analysis | `analyze_<domain>` | Domain inputs to an analytical result |
 | Generic execution | `batch_run` and similar helpers | Apply an operation to a batch without changing what the operation means |
@@ -73,9 +73,9 @@ A domain flow binds an immutable `cfg` at construction and applies it to each in
 - `batch_run` is a generic batch helper, not a news or paper operation.
 - The `*_flow` function-name pattern is banned for new operations; the former paper extraction function was removed rather than kept as a wrapper.
 - `PaperFlow(cfg)` is the config-bound paper flow and the single entry point for every paper shape; `build(input)` produces a knowledge artifact whose shape is chosen by the cfg *type* (`PaperStructureCfg` → `PaperStructureTree`, `PaperSemanticCfg` → `PaperSemanticResult`). `Flow` as a noun here is deliberate and allowed.
-- `AgenticRetriever(cfg)` is the reasoning-retrieval service in `quantmind.mind`; `retrieve(structure, question)` returns evidence values. It has one behavior — an LLM agent reasons over the structure — so it binds `RetrievalCfg` but does no cfg-type dispatch. Mechanical semantic search is `quantmind.library.search`, a different layer, not a strategy here.
+- `AgenticRetriever(cfg)` is the reasoning-retrieval service in `finsage.mind`; `retrieve(structure, question)` returns evidence values. It has one behavior — an LLM agent reasons over the structure — so it binds `RetrievalCfg` but does no cfg-type dispatch. Mechanical semantic search is `finsage.library.search`, a different layer, not a strategy here.
 
-The current `quantmind.flows` package continues to contain public operations in this release. Renaming it to `operations` or adding a separate `pipelines` package is outside this page.
+The current `finsage.flows` package continues to contain public operations in this release. Renaming it to `operations` or adding a separate `pipelines` package is outside this page.
 
 ## Review Checklist
 

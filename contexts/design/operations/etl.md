@@ -2,9 +2,9 @@
 
 ## Quick Summary
 
-- **Purpose**: Define the two explicit execution shapes in `quantmind.etl`, their delivery semantics, and the local observation contract shared by both.
+- **Purpose**: Define the two explicit execution shapes in `finsage.etl`, their delivery semantics, and the local observation contract shared by both.
 - **Read when**: Choosing between `ETLPipeline` and `BatchETLPipeline`, changing their execution or run-record behavior, or adopting either scaffold in a consuming repository.
-- **Owner**: `quantmind.etl`; concrete domain pipelines remain in consuming repositories or focused examples.
+- **Owner**: `finsage.etl`; concrete domain pipelines remain in consuming repositories or focused examples.
 - **Status**: Current. `ETLPipeline` and `BatchETLPipeline` are implemented together in the active ETL change.
 
 ## Contents
@@ -21,14 +21,14 @@
 
 ## Keep two execution shapes explicit
 
-`quantmind.etl` is a stdlib-only authoring and observation scaffold, not a workflow engine. It exposes two parallel composition-based classes because delivery cardinality changes execution and observation semantics:
+`finsage.etl` is a stdlib-only authoring and observation scaffold, not a workflow engine. It exposes two parallel composition-based classes because delivery cardinality changes execution and observation semantics:
 
 - `ETLPipeline` performs one whole-run `extract → transform → load` and returns that single load result.
 - `BatchETLPipeline` repeatedly pulls one business-defined batch, transforms it, and loads it before pulling the next batch. It returns a bounded summary rather than retaining every load result.
 
 Neither class inherits the other. A callable returning an async iterable never makes `ETLPipeline` switch modes implicitly: return-value sniffing would misclassify legitimate values and make the run-record contract conditional. Both classes reuse a package-private local record layer because atomic snapshots, sparse JSONL events, and progress coalescing now have two real callers.
 
-Existing `quantmind.flows` remain pure `input → self-contained artifact` operations and neither inherit nor depend on these ETL scaffolds. Concrete ingestion pipelines belong in their consuming repository; `quantmind.etl` contains only reusable execution and observation behavior.
+Existing `finsage.flows` remain pure `input → self-contained artifact` operations and neither inherit nor depend on these ETL scaffolds. Concrete ingestion pipelines belong in their consuming repository; `finsage.etl` contains only reusable execution and observation behavior.
 
 ## Run one delivery through ETLPipeline
 
@@ -68,7 +68,7 @@ run = pipeline.create_run(source, dry_run=dry_run)
 
 There is deliberately no `False` default. A production script or CLI must obtain the value from a runtime option and pass that variable so switching modes never requires editing pipeline code; tests, notebooks, and fixed-purpose one-off scripts may pass a Boolean literal. The run-level value is immutable, shared by every stage and batch, and available as the read-only `PipelineContext.dry_run` property. Stage authors pass it through to the repository, gateway, publisher, or other capability that owns the actual mutation decision instead of scattering temporary switches through orchestration code.
 
-Dry-run executes the complete stage shape. The scaffold never skips `load`: a dry-run load still validates the would-be delivery, computes planned counts, reports progress, and may expose errors visible only at the delivery boundary. With `ctx.dry_run=True`, however, the authored pipeline must prevent every persistent business mutation, including database changes, storage or artifact writes, staging and checkpoint writes, publishing, queueing, webhooks, and final delivery. Reads, fetching, parsing, normalization, pruning, AI processing, previews, planned counts, validation, and QuantMind's own local run-observation files remain allowed. AI processing may still incur cost and rate usage; dry-run is not a zero-cost mode.
+Dry-run executes the complete stage shape. The scaffold never skips `load`: a dry-run load still validates the would-be delivery, computes planned counts, reports progress, and may expose errors visible only at the delivery boundary. With `ctx.dry_run=True`, however, the authored pipeline must prevent every persistent business mutation, including database changes, storage or artifact writes, staging and checkpoint writes, publishing, queueing, webhooks, and final delivery. Reads, fetching, parsing, normalization, pruning, AI processing, previews, planned counts, validation, and FinSage's own local run-observation files remain allowed. AI processing may still incur cost and rate usage; dry-run is not a zero-cost mode.
 
 One load signature serves both modes, so its output type must honestly represent both. In dry-run it returns a planned path, planned summary, or `None`, never a reference that implies a nonexistent artifact was delivered. Dry-run progress metrics and batch count deltas use a `planned_*` prefix or an equally explicit planned name; names that assert real delivery, such as `rows_written`, are reserved for normal runs.
 
@@ -82,10 +82,10 @@ This flag establishes a narrow admission rule for future execution-semantic para
 
 Both shapes keep an atomic latest snapshot in `run.json` and a sparse lifecycle journal in `events.jsonl`. They use distinct schema IDs so an observer never has to infer execution shape from values:
 
-- whole-run snapshots: `quantmind.etl.run/v1`;
-- whole-run events: `quantmind.etl.event/v1`;
-- micro-batch snapshots: `quantmind.etl.batch-run/v1`, with `batch.index`, successfully completed load count `batch.completed`, and optional `batch.total`;
-- micro-batch events: `quantmind.etl.batch-event/v1`.
+- whole-run snapshots: `finsage.etl.run/v1`;
+- whole-run events: `finsage.etl.event/v1`;
+- micro-batch snapshots: `finsage.etl.batch-run/v1`, with `batch.index`, successfully completed load count `batch.completed`, and optional `batch.total`;
+- micro-batch events: `finsage.etl.batch-event/v1`.
 
 `run.json` is the authoritative state: after a terminal snapshot commits, the terminal JSONL append is best-effort and cannot change the `execute()` outcome, while failure and cancellation observation errors preserve the original exception.
 
@@ -135,4 +135,4 @@ Cancellation stops at the active await. A batch runner neither drains queued wor
 
 The current package deliberately excludes cross-batch pipelining, multiple simultaneously active stages, automatic checkpoint/resume, retry policy, heartbeat, ETA, retention, scheduling, queues, database ledgers, dashboards, arbitrary logging, artifact management, DAGs, streaming records, and exactly-once claims.
 
-Cross-batch pipelining may improve throughput, but it would make a single `stage` field false because transform and load could be active simultaneously. It requires a separate observation design rather than a small optimization to `BatchETLPipeline`. A future ETL DAG remains a parallel class inside `quantmind.etl`, sharing only proven package-private recording mechanics and never inheriting either current pipeline class.
+Cross-batch pipelining may improve throughput, but it would make a single `stage` field false because transform and load could be active simultaneously. It requires a separate observation design rather than a small optimization to `BatchETLPipeline`. A future ETL DAG remains a parallel class inside `finsage.etl`, sharing only proven package-private recording mechanics and never inheriting either current pipeline class.

@@ -4,8 +4,8 @@
 
 - **Purpose**: Define how an ordered `ParsedDocument` becomes deterministic page-aware chunks and ranked document-local evidence.
 - **Read when**: Changing document chunking, source spans, document-local retrieval, Paper Flow chunk construction, or structure-tree inputs.
-- **Status**: Implemented by `quantmind.rag.document`.
-- **Core rule**: LlamaIndex owns splitting and ranking mechanics; QuantMind owns stable identity and source/page provenance.
+- **Status**: Implemented by `finsage.rag.document`.
+- **Core rule**: LlamaIndex owns splitting and ranking mechanics; FinSage owns stable identity and source/page provenance.
 
 ## Contents
 
@@ -18,9 +18,9 @@
 
 ## Package Boundary
 
-`quantmind.preprocess` owns deterministic source parsing and returns a page-aware [`ParsedDocument`](../preprocess/pdf.md). `quantmind.rag` may import that value and apply LlamaIndex transformations and retrieval. Preprocessing never imports RAG, so parsing remains usable without a query or index.
+`finsage.preprocess` owns deterministic source parsing and returns a page-aware [`ParsedDocument`](../preprocess/pdf.md). `finsage.rag` may import that value and apply LlamaIndex transformations and retrieval. Preprocessing never imports RAG, so parsing remains usable without a query or index.
 
-LlamaIndex is a required dependency and owns `SentenceSplitter`, BM25, nodes, indexes, retrievers, ranking mechanics, and upstream parameters. QuantMind adds stable source hashes, page ownership, page-local character spans, block coordinates, screenshot/image references, and conversion back to typed evidence.
+LlamaIndex is a required dependency and owns `SentenceSplitter`, BM25, nodes, indexes, retrievers, ranking mechanics, and upstream parameters. FinSage adds stable source hashes, page ownership, page-local character spans, block coordinates, screenshot/image references, and conversion back to typed evidence.
 
 ## Chunk Contract
 
@@ -44,19 +44,19 @@ Repeating chunking for the same parsed document and configuration produces the s
 
 `retrieve_parsed_document()` chunks one document, uses LlamaIndex BM25, and returns ranked `ParsedDocumentHit` values. Each hit wraps one `ParsedChunk` and a score. The operation is transient and requires no canonical library write.
 
-LlamaIndex `Document`, node, retriever, index, and score-wrapper types remain private. Public callers receive frozen QuantMind dataclasses with enough evidence to trace a hit back to physical pages and parser artifacts.
+LlamaIndex `Document`, node, retriever, index, and score-wrapper types remain private. Public callers receive frozen FinSage dataclasses with enough evidence to trace a hit back to physical pages and parser artifacts.
 
 ## Paper Flow Boundary
 
 The [paper flow](../flow/paper.md) (`PaperFlow(PaperSemanticCfg).build`) uses `chunk_parsed_document()` as the deterministic split stage. It converts `ParsedChunk` values into canonical `PaperChunk` members only after an exact `PaperSourceRevision` exists.
 
-The conversion replaces parser paths with canonical source asset IDs and validates character spans against page evidence. The resulting `PaperChunkSet` is a durable, independently versioned artifact. `quantmind.rag` itself does not import or construct canonical paper models.
+The conversion replaces parser paths with canonical source asset IDs and validates character spans against page evidence. The resulting `PaperChunkSet` is a durable, independently versioned artifact. `finsage.rag` itself does not import or construct canonical paper models.
 
 ## Collection Search and PageIndex
 
 Document-local RAG and collection search have different responsibilities. [`LocalKnowledgeLibrary`](../library/local.md) stores canonical sources and artifacts in SQLite and privately uses LlamaIndex for collection-wide embedding ranking. It does not persist transient `ParsedDocumentHit` values.
 
-Paper Flow V1 defines no nested paper tree. PageIndex-style structure handling is not a RAG operation: deterministic outline signals live in `quantmind.preprocess`, building the independently persisted artifact lives in `quantmind.flows`, and library-backed reasoning retrieval lives in `quantmind.mind`. `quantmind.rag` stays deterministic chunking and BM25 with no LLM dependency and hosts no draft producer. See [Build and retrieve from a page-preserving structure tree](../mind/retrieval.md). Canonical IDs, links, citations, and source-backed text remain code-owned throughout.
+Paper Flow V1 defines no nested paper tree. PageIndex-style structure handling is not a RAG operation: deterministic outline signals live in `finsage.preprocess`, building the independently persisted artifact lives in `finsage.flows`, and library-backed reasoning retrieval lives in `finsage.mind`. `finsage.rag` stays deterministic chunking and BM25 with no LLM dependency and hosts no draft producer. See [Build and retrieve from a page-preserving structure tree](../mind/retrieval.md). Canonical IDs, links, citations, and source-backed text remain code-owned throughout.
 
 ## What This Package Does Not Abstract
 

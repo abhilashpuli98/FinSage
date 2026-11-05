@@ -1,6 +1,6 @@
 # Local Semantic Knowledge Library
 
-`LocalKnowledgeLibrary` persists canonical QuantMind values in SQLite and ranks rebuildable text-embedding projections with a private LlamaIndex retriever. The canonical storage, transaction, financial-time, migration, and PageIndex boundaries live in the [local library design](../contexts/design/library/local.md).
+`LocalKnowledgeLibrary` persists canonical FinSage values in SQLite and ranks rebuildable text-embedding projections with a private LlamaIndex retriever. The canonical storage, transaction, financial-time, migration, and PageIndex boundaries live in the [local library design](../contexts/design/library/local.md).
 
 ## Store a Paper Flow Result
 
@@ -12,7 +12,7 @@ result = await PaperFlow(
 ).build(ArxivIdentifier(id="1706.03762v7"))
 
 library = await LocalKnowledgeLibrary.open(
-    ".quantmind/library.db",
+    ".finsage/library.db",
     embedding_model="text-embedding-3-small",
 )
 try:
@@ -44,10 +44,10 @@ The structure tree is derived only from the exact source pages and structuring p
 Opening a library performs no embedding or network request. Search embeds only the query when stored projections are reusable:
 
 ```python
-from quantmind.knowledge import PaperArtifactKind
+from finsage.knowledge import PaperArtifactKind
 
 library = await LocalKnowledgeLibrary.open(
-    ".quantmind/library.db",
+    ".finsage/library.db",
     embedding_model="text-embedding-3-small",
 )
 try:
@@ -73,7 +73,7 @@ finally:
     await library.close()
 ```
 
-A `paper_summary` hit resolves to `PaperGlobalSummary`. A `paper_chunk_set` hit has a member ID and resolves to the exact `PaperChunk`, including source-page spans. Structure trees are retrieved by reasoning over titles and summaries through `AgenticRetriever(RetrievalCfg(...)).retrieve()` in `quantmind.mind` — an LLM agent traverses the structure — not by semantic search in the vectorless MVP. Every `SemanticHit` also includes:
+A `paper_summary` hit resolves to `PaperGlobalSummary`. A `paper_chunk_set` hit has a member ID and resolves to the exact `PaperChunk`, including source-page spans. Structure trees are retrieved by reasoning over titles and summaries through `AgenticRetriever(RetrievalCfg(...)).retrieve()` in `finsage.mind` — an LLM agent traverses the structure — not by semantic search in the vectorless MVP. Every `SemanticHit` also includes:
 
 - `matched_text`, the exact library-owned projection used for ranking;
 - `projection`, the projection version, model, dimensions, and content hash;

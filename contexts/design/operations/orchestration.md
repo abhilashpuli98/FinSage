@@ -66,7 +66,7 @@ Likewise, a small service may bind a genuinely shared construction-time thing â€
 
 ## Principle 3: Pipeline vs Component Altitude
 
-A **pipeline** (in `quantmind.flows`) is a finished, batteries-included workflow: a caller states an intent and gets back a **complete, self-contained artifact**. A **component** (`knowledge`, `preprocess`, `rag`, `library`, `mind`) is a building block a caller wires themselves.
+A **pipeline** (in `finsage.flows`) is a finished, batteries-included workflow: a caller states an intent and gets back a **complete, self-contained artifact**. A **component** (`knowledge`, `preprocess`, `rag`, `library`, `mind`) is a building block a caller wires themselves.
 
 Three rules keep the two altitudes honest:
 
@@ -91,7 +91,7 @@ Pick the shape by one question: **what must stay constant across repeated calls,
 
 ## Worked Example: Paper Flow V1
 
-- **Identity** lives on `PaperSourceRevision.from_parsed`, `PaperChunkSet.from_parsed_chunks`, and `PaperGlobalSummary.from_draft`. `quantmind/flows/paper.py` imports no `_paper_*` helper and mints no ID.
+- **Identity** lives on `PaperSourceRevision.from_parsed`, `PaperChunkSet.from_parsed_chunks`, and `PaperGlobalSummary.from_draft`. `finsage/flows/paper.py` imports no `_paper_*` helper and mints no ID.
 - **Translation** stays in the flow: `_fetch_paper_source` (IO), `_adapt_pages` (reads screenshot/image bytes, maps to `PaperPageInput`), `_adapt_chunks` (maps `ParsedChunk` to `PaperChunkInput`).
 - **Summarization** is a deterministic map-reduce (`_chunk_groups` tiles the chunk set; one research agent per group; one reducer). The earlier manager/worker coordinator plus its `_SummaryBudget` concurrency accountant were removed â€” see [Bounded Model Calls](../flow/paper.md#bounded-model-calls).
 

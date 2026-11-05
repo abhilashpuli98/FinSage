@@ -1,18 +1,18 @@
 # Observable ETL authoring
 
-`quantmind.etl` provides two small async authoring scaffolds with local machine-readable run state:
+`finsage.etl` provides two small async authoring scaffolds with local machine-readable run state:
 
 - `ETLPipeline` performs one whole-run `extract → transform → load` and returns the single load result.
 - `BatchETLPipeline` lazily pulls one business batch, transforms it, and loads it before pulling the next batch. It returns an aggregate summary without retaining every batch.
 
-Both require callers to choose `dry_run` when creating a run. Dry-run executes the same stages, including `load`, but authored mutation boundaries must plan or validate without persistent business writes. Concrete domain pipelines belong in the consuming repository; `quantmind.etl` contains only the reusable scaffold. See the [ETL design](../contexts/design/operations/etl.md) for delivery, staging, dry-run, recovery, and selection rules.
+Both require callers to choose `dry_run` when creating a run. Dry-run executes the same stages, including `load`, but authored mutation boundaries must plan or validate without persistent business writes. Concrete domain pipelines belong in the consuming repository; `finsage.etl` contains only the reusable scaffold. See the [ETL design](../contexts/design/operations/etl.md) for delivery, staging, dry-run, recovery, and selection rules.
 
 ## Run one whole-run delivery
 
 Bind three async callables when all processing leads to one final delivery:
 
 ```python
-from quantmind.etl import ETLPipeline, PipelineContext
+from finsage.etl import ETLPipeline, PipelineContext
 
 
 async def extract(source: str, *, ctx: PipelineContext) -> list[str]:
@@ -58,7 +58,7 @@ Use `BatchETLPipeline` when each business-defined batch should be transformed an
 ```python
 from collections.abc import AsyncIterator, Mapping
 
-from quantmind.etl import BatchETLPipeline, PipelineContext
+from finsage.etl import BatchETLPipeline, PipelineContext
 
 
 async def extract(
@@ -141,23 +141,23 @@ If that write already makes a batch consumable, it is a real `load(batch)` even 
 
 `create_run(source, *, dry_run=...)` has no default. Production scripts should read the value from a runtime option such as `--dry-run` and pass that variable, so switching modes never requires editing stage code.
 
-Every stage receives the same read-only `ctx.dry_run` value. Pass it to the repository, gateway, publisher, or storage adapter that owns the mutation decision. The scaffold does not skip `load`; a dry-run load validates the would-be delivery, reports `planned_*` progress or batch counts, and returns a planned path, planned summary, or `None` rather than a reference to a nonexistent artifact. Dry-run forbids persistent business mutation, including staging/checkpoint writes, but still allows reads, parsing, validation, previews, planned counts, and QuantMind's local run-observation files. AI processing may still run and incur cost or rate usage.
+Every stage receives the same read-only `ctx.dry_run` value. Pass it to the repository, gateway, publisher, or storage adapter that owns the mutation decision. The scaffold does not skip `load`; a dry-run load validates the would-be delivery, reports `planned_*` progress or batch counts, and returns a planned path, planned summary, or `None` rather than a reference to a nonexistent artifact. Dry-run forbids persistent business mutation, including staging/checkpoint writes, but still allows reads, parsing, validation, previews, planned counts, and FinSage's local run-observation files. AI processing may still run and incur cost or rate usage.
 
 ## Read local run state
 
 `create_run()` atomically writes `state="created"` before it returns. Snapshots, sparse events, and the receipt include top-level `dry_run`; do not duplicate it inside `config_summary`. The receipt is one JSON line containing the Run ID, `dry_run`, and the absolute `status_file`. By default, each run lives under:
 
 ```text
-<cwd>/.quant-mind/etl-pipeline-runs/<run-id>/run.json
-<cwd>/.quant-mind/etl-pipeline-runs/<run-id>/events.jsonl
+<cwd>/.finsage/etl-pipeline-runs/<run-id>/run.json
+<cwd>/.finsage/etl-pipeline-runs/<run-id>/events.jsonl
 ```
 
 The four canonical schema IDs are:
 
-- whole-run snapshots: `quantmind.etl.run/v1`;
-- whole-run events: `quantmind.etl.event/v1`;
-- micro-batch snapshots: `quantmind.etl.batch-run/v1`;
-- micro-batch events: `quantmind.etl.batch-event/v1`.
+- whole-run snapshots: `finsage.etl.run/v1`;
+- whole-run events: `finsage.etl.event/v1`;
+- micro-batch snapshots: `finsage.etl.batch-run/v1`;
+- micro-batch events: `finsage.etl.batch-event/v1`.
 
 Read `run.json` for the latest snapshot. Check its top-level `dry_run` value before interpreting the result: dry-run `succeeded` means the planned delivery passed validation, not that data was delivered. Its states are `created`, `running`, `succeeded`, `failed`, and `cancelled`. It includes the current macro stage, the executing process's PID, timestamps, safe config summary, latest progress, and a limited error type/message. A batch run additionally includes its current batch index, successfully completed batch count, and optional total. The PID is only a local process-liveness hint; it is not a heartbeat and does not prove forward progress or success.
 

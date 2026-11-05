@@ -2,7 +2,7 @@
 
 ## Quick Summary
 
-- **Purpose**: Define how QuantMind collects public news and records proof of what each source returned.
+- **Purpose**: Define how FinSage collects public news and records proof of what each source returned.
 - **Read when**: Changing `collect_news`, `NewsWindow`, a news source, the `complete` flag, or news checks.
 - **Status**: Current design; the open-source package currently supports PR Newswire.
 - **Core rule**: Collection returns documents, failures, and whether the full time window was covered. Other code turns documents into knowledge, stores them, schedules runs, and removes irrelevant news.
@@ -31,7 +31,7 @@ The primary requirement is that any caller can request a complete, one-shot coll
 ## Design Principles
 
 1. **Ask for news, not fetch details.** Callers choose a source and time window. They do not choose RSS, listing pages, how to move between pages, or article parsing rules.
-2. **Return every source row.** QuantMind does not silently remove duplicate source rows. Repeated rows remain repeated output records, and may share the same stable ID.
+2. **Return every source row.** FinSage does not silently remove duplicate source rows. Repeated rows remain repeated output records, and may share the same stable ID.
 3. **Show partial failures.** The returned batch includes item failures. Invalid inputs still raise before network work starts.
 4. **Hide source implementation details.** PR Newswire may later use a public mechanism other than listing pages without changing the public function.
 5. **List supported sources explicitly.** The first version selects from a closed source list. It does not expose a provider plugin API or registry.
@@ -44,8 +44,8 @@ Callers use one entry point:
 ```python
 from datetime import datetime, timezone
 
-from quantmind.configs import NewsCollectionCfg, NewsWindow
-from quantmind.flows import collect_news
+from finsage.configs import NewsCollectionCfg, NewsWindow
+from finsage.flows import collect_news
 
 batch = await collect_news(
     NewsWindow(
@@ -63,18 +63,18 @@ batch = await collect_news(
 
 ### Collection records are not knowledge
 
-QuantMind keeps collected documents separate from structured knowledge:
+FinSage keeps collected documents separate from structured knowledge:
 
 | Operation | Result | Owning package |
 |-----------|--------|-----------------|
-| `collect_news` | Source documents, fetch details, failures, and whether the full window was scanned | `quantmind.preprocess` |
-| future `extract_news_knowledge` | Extracted financial events | `quantmind.knowledge.News` |
+| `collect_news` | Source documents, fetch details, failures, and whether the full window was scanned | `finsage.preprocess` |
+| future `extract_news_knowledge` | Extracted financial events | `finsage.knowledge.News` |
 
 `NewsDocument` is therefore not a `KnowledgeItem`. It carries HTTP details, raw bytes, parsing output, and collection status that remain useful before any LLM or business data format is chosen. `knowledge.News` is a structured financial event with entities, sentiment, financial importance (`materiality`), source links, and text for embeddings. A pipeline may use both types, but one cannot replace the other.
 
 ## Returned Data
 
-`collect_news` returns a `NewsBatch` with four fields. Import these public types from `quantmind.preprocess`:
+`collect_news` returns a `NewsBatch` with four fields. Import these public types from `finsage.preprocess`:
 
 - `documents`: successfully collected `NewsDocument` observations;
 - `failures`: lightweight `NewsFailure` records for work that could not be completed;
@@ -88,7 +88,7 @@ A `NewsDocument` contains the source name, stable ID, preferred article URL, tit
 
 `NewsArtifact` records what was fetched. It contains the content hash, content type, source and resolved URLs, status, headers, and fetch time, with an optional byte payload.
 
-Repeated listing rows are not removed. If two rows point to the same release, the batch contains two observations with the same stable ID. A consumer can use that ID to update the same database row safely while still recording what QuantMind observed.
+Repeated listing rows are not removed. If two rows point to the same release, the batch contains two observations with the same stable ID. A consumer can use that ID to update the same database row safely while still recording what FinSage observed.
 
 ## Collection Steps
 
@@ -128,7 +128,7 @@ Article failures stay in `failures` but do not change whether all listing rows w
 
 ## Who Owns What
 
-QuantMind owns:
+FinSage owns:
 
 - scanning public listings and fetching articles;
 - repeatable HTML cleanup;
@@ -177,7 +177,7 @@ When a second source is implemented, compare its real behavior with PR Newswire 
 A coding agent adding a second source follows this checklist:
 
 1. Add the source name to `NewsWindow.source`.
-2. Add one private `quantmind/preprocess/<source>.py` collector.
+2. Add one private `finsage/preprocess/<source>.py` collector.
 3. Add one explicit branch to `collect_news`; the type checker must pass.
 4. Add saved-input tests for success, time edges, duplicate observations, partial failures, and the `complete` flag.
 5. Add a test proving that only the selected collector is called.

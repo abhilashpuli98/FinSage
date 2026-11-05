@@ -2,9 +2,9 @@
 
 ## Quick Summary
 
-- **Purpose**: Explain how QuantMind keeps contributors and coding agents on the same rules, which enforcement layer catches whom, and how the same rule is expressed for both Claude Code and Codex without maintaining two copies of its content.
+- **Purpose**: Explain how FinSage keeps contributors and coding agents on the same rules, which enforcement layer catches whom, and how the same rule is expressed for both Claude Code and Codex without maintaining two copies of its content.
 - **Read when**: Adding or changing a hook, a rule, a CI gate, or any `AGENTS.md` / `CLAUDE.md` / skill guidance; or deciding whether a new rule should be advisory (a rule) or a hard guarantee (a hook).
-- **Load next**: For contexts-page rules, `.claude/skills/quantmind-dev/references/write-contexts.md`; for commit and PR rules, the `quantmind-dev` skill references.
+- **Load next**: For contexts-page rules, `.claude/skills/finsage-dev/references/write-contexts.md`; for commit and PR rules, the `finsage-dev` skill references.
 - **Status**: Current, except the `CLAUDE.md` = `@AGENTS.md` single-source change, which is planned (it needs a matching `tests/test_contexts.py` update and lands separately).
 
 ## Contents
@@ -61,8 +61,8 @@ Canonical sources — each rule's content lives in exactly one file:
 
 | Rule | Single source | Claude route | Codex route |
 |---|---|---|---|
-| Contexts authoring standard | `.claude/skills/quantmind-dev/references/write-contexts.md` | `.claude/rules/contexts-authoring.md` (`paths: contexts/**`) | Read via the skill reference; no parallel file added |
-| Commit message convention | `.claude/skills/quantmind-dev/references/commit.md` | `commit-msg` git hook (fires when the agent shells out to `git`) | Same `commit-msg` git hook |
+| Contexts authoring standard | `.claude/skills/finsage-dev/references/write-contexts.md` | `.claude/rules/contexts-authoring.md` (`paths: contexts/**`) | Read via the skill reference; no parallel file added |
+| Commit message convention | `.claude/skills/finsage-dev/references/commit.md` | `commit-msg` git hook (fires when the agent shells out to `git`) | Same `commit-msg` git hook |
 | No verification bypass | `scripts/hooks/pre_tool_use_no_bypass.py` | `.claude/settings.json` PreToolUse | `.codex/hooks.json` PreToolUse |
 
 Known duplication to resolve later: `write-contexts.md` (and the other skill references) exist as identical copies under both `.claude/skills/` and `.agents/skills/`; a single-source consolidation is future work.

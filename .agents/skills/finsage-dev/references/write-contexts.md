@@ -1,4 +1,4 @@
-# Writing contexts pages for QuantMind
+# Writing contexts pages for FinSage
 
 The canonical standard for authoring or editing anything under `contexts/`. Read it before adding or changing a design or dev page. `tests/test_contexts.py` (part of `scripts/verify.sh`) enforces the structural rules below, so a page that ignores them fails the build.
 

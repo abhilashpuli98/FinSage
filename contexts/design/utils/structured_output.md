@@ -4,7 +4,7 @@
 
 - **Purpose**: Get a validated Pydantic object back from an Agents SDK run on any provider the SDK can route, including ones that reject strict `json_schema` structured output.
 - **Read when**: Adding or changing an agent call that sets `output_type=`, or debugging a `BadRequestError` about `response_format` on a non-OpenAI model.
-- **Owner**: `quantmind/utils/structured_output.py` (`run_structured`). A leaf helper; every package may import it.
+- **Owner**: `finsage/utils/structured_output.py` (`run_structured`). A leaf helper; every package may import it.
 - **Status**: Current behavior. One bounded fallback — no retry loop, no provider table.
 
 ## Contents

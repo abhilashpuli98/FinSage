@@ -5,20 +5,21 @@ Human-readable equivalent: root `CONTRIBUTING.md` (same steps, same order).
 
 ## Set Up as a Contributor
 
-1. Get a working copy. External contributors fork on GitHub and clone the
-   fork; maintainers branch directly off `master`:
+1. Fork `https://github.com/abhilashpuli98/FinSage` and clone your fork. Start a feature branch from `main`:
 
    ```bash
-   git clone https://github.com/<you>/quant-mind.git && cd quant-mind
+   git clone https://github.com/<your-user>/FinSage.git && cd FinSage
    git checkout -b <type>/<short-topic>   # e.g. feat/sec-collection
    ```
 
 2. Create the environment with [uv](https://github.com/astral-sh/uv):
 
    ```bash
-   uv venv && source .venv/bin/activate
+   uv venv
    uv pip install -e ".[dev]"
    ```
+
+   Activate `.venv` before installing (`.venv\Scripts\Activate.ps1` in PowerShell, or `source .venv/bin/activate` on macOS/Linux).
 
 3. Install the git hooks (pre-commit lint/format stage plus the pre-push
    verify stage):
@@ -63,7 +64,7 @@ Human-readable equivalent: root `CONTRIBUTING.md` (same steps, same order).
 
 ## Boundaries
 
-- Setup here targets contributing to QuantMind itself. Library-only users can
+- Setup here targets contributing to FinSage itself. Library-only users can
   stop after `uv pip install -e .` and do not need hooks.
 - Do not file issues that encode product decisions as settled; state the need
   and let maintainer discussion pick the design (see SKILL.md Boundaries).

@@ -1,6 +1,6 @@
 # Component Development Workflow
 
-How to implement or refactor code under `quantmind/`. Read this before
+How to implement or refactor code under `finsage/`. Read this before
 writing code; the architecture constraints in root `AGENTS.md` / `CLAUDE.md`
 apply throughout.
 
@@ -37,19 +37,19 @@ apply throughout.
 
 ### Dependency contracts (enforced by import-linter)
 
-| Module | May import from `quantmind.*` |
+| Module | May import from `finsage.*` |
 |--------|-------------------------------|
-| `quantmind/etl/` | nothing (independent leaf) |
-| `quantmind/utils/` | nothing (leaf) |
-| `quantmind/knowledge/` | nothing (leaf) |
-| `quantmind/configs/` | `knowledge` only |
-| `quantmind/preprocess/` | `utils` only |
-| `quantmind/rag/` | `preprocess` only |
-| `quantmind/library/` | `knowledge` only |
-| `quantmind/mind/` | `knowledge`, `configs`, `utils` (retrieval is library-free; the `library` edge is reserved for the future collection path, not single-tree `retrieve`) |
-| `quantmind/flows/`, `quantmind/magic.py` | apex — may import domain layers above, but not the independent `etl` scaffold |
+| `finsage/etl/` | nothing (independent leaf) |
+| `finsage/utils/` | nothing (leaf) |
+| `finsage/knowledge/` | nothing (leaf) |
+| `finsage/configs/` | `knowledge` only |
+| `finsage/preprocess/` | `utils` only |
+| `finsage/rag/` | `preprocess` only |
+| `finsage/library/` | `knowledge` only |
+| `finsage/mind/` | `knowledge`, `configs`, `utils` (retrieval is library-free; the `library` edge is reserved for the future collection path, not single-tree `retrieve`) |
+| `finsage/flows/`, `finsage/magic.py` | apex — may import domain layers above, but not the independent `etl` scaffold |
 
-### `quantmind/etl/` — observable whole-run and micro-batch ETL
+### `finsage/etl/` — observable whole-run and micro-batch ETL
 
 - Bind exactly three async stage callables to `ETLPipeline` for one whole-run
   delivery. Use the parallel `BatchETLPipeline` when an async producer yields
@@ -59,7 +59,7 @@ apply throughout.
 - Use composition rather than an ABC, subclass tree, or inheritance between the
   two pipeline classes. Keep batch execution strictly serial unless a later
   observation contract explicitly represents simultaneously active stages.
-- Keep it independent of every other `quantmind.*` package. Existing flows do
+- Keep it independent of every other `finsage.*` package. Existing flows do
   not inherit it; their pure `input → artifact` contract remains unchanged.
 - Report only real completed work through `PipelineContext.progress()`. In batch
   mode, only a load that returns successfully increments the completed-batch
@@ -68,42 +68,42 @@ apply throughout.
   files, a CLI, heartbeat, scheduler, retry policy, checkpoint/resume, or
   workflow engine. See `contexts/design/operations/etl.md`.
 
-### `quantmind/knowledge/` — data standard
+### `finsage/knowledge/` — data standard
 
 - Pydantic models, `frozen=True`, `extra="forbid"`.
 - Every `BaseKnowledge` subclass **must** require `as_of: datetime`
   (financial time-sensitivity is mandatory) and a typed `source: SourceRef`
   (no bare strings).
 - Canonical models do not select retrieval text or store vectors. Put
-  rebuildable text projections in `quantmind.library`.
+  rebuildable text projections in `finsage.library`.
 - Pick one shape: `FlattenKnowledge` (atomic card), `TreeKnowledge`
   (hierarchical artifact), or `GraphKnowledge` (placeholder) for conventional
   knowledge. Source-first paper revisions and independently versioned paper
   artifacts use their dedicated frozen models instead of `BaseKnowledge`.
 
-### `quantmind/configs/` — operation cfg + typed inputs
+### `finsage/configs/` — operation cfg + typed inputs
 
 - Extend `BaseFlowCfg`; inputs are Pydantic models or discriminated unions.
 - Never `Dict[str, Any]` in signatures — model it.
 
-### `quantmind/preprocess/` — deterministic data prep
+### `finsage/preprocess/` — deterministic data prep
 
 - Fetch / format / clean / time utilities: deterministic, no LLM calls.
 - Return frozen dataclasses (`Fetched`, `RawPaper`, ...), not dicts.
-- Surface the common path at the package root (`from quantmind.preprocess
+- Surface the common path at the package root (`from finsage.preprocess
   import fetch_arxiv`), keep explicit submodule paths working.
 
-### `quantmind/rag/` — opinionated document RAG
+### `finsage/rag/` — opinionated document RAG
 
 - Use LlamaIndex for chunking, indexing, retrieval, and ranking; add only the
-  source/page/provenance conversion that QuantMind owns.
-- Import deterministic inputs from `quantmind.preprocess`; preprocessing must
+  source/page/provenance conversion that FinSage owns.
+- Import deterministic inputs from `finsage.preprocess`; preprocessing must
   never import RAG.
-- Keep LlamaIndex types private. Return frozen QuantMind evidence values.
+- Keep LlamaIndex types private. Return frozen FinSage evidence values.
 - Do not add a public retriever, vector-store, provider, backend registry, or
   generic query-engine hierarchy.
 
-### `quantmind/flows/` and `quantmind/magic.py` — apex layer
+### `finsage/flows/` and `finsage/magic.py` — apex layer
 
 - Public operations are intent-oriented async callables. Prefer a function for a
   one-off transform; use a config-bound service class when a batch must run under
@@ -123,7 +123,7 @@ apply throughout.
 - Fan-out goes through `batch_run` (bounded concurrency, error policy);
   `batch_run` rejects `memory=` at the signature layer by design.
 
-### `quantmind/library/` — local persistence and semantic retrieval
+### `finsage/library/` — local persistence and semantic retrieval
 
 - Persist canonical knowledge and derived artifacts; dump and load, do not
   transform. A self-contained artifact (e.g. a structure tree carrying its own
@@ -133,7 +133,7 @@ apply throughout.
 - Keep SQLite and LlamaIndex types private; import from `knowledge` only.
 - Do not add a vector-store, retriever, provider, or backend registry.
 
-### `quantmind/mind/` — cognitive layer
+### `finsage/mind/` — cognitive layer
 
 - **Memory**: backends implement the `Memory` Protocol with granular `tools()`,
   `mcp_servers()`, `run_hooks()`, `reset()` — each may return an empty list; do
@@ -144,14 +144,14 @@ apply throughout.
   structure — no `library`, no query-time refill. The `locator` field is optional
   provenance for cross-artifact fusion, never the path to the content. `mind` is
   the **reasoning** layer; **mechanical** retrieval (semantic vector search /
-  BM25) is `quantmind.library` / `quantmind.rag`, and a future hybrid path
+  BM25) is `finsage.library` / `finsage.rag`, and a future hybrid path
   composes them (a semantic shortlist seeding this reasoning pass). Use the Agents
   SDK directly (`Agent`, `@function_tool`, `output_type=`, its own `RunConfig`);
   do not import `flows._runner`, and do not build a retriever/query-engine
   hierarchy — one agentic strategy, no strategy registry. See
   `contexts/design/mind/retrieval.md`.
 
-### `quantmind/utils/`
+### `finsage/utils/`
 
 - The logger, plus small dependency-free helpers that wrap an Agents SDK
   seam and must be shared across layers without one importing another
@@ -165,11 +165,11 @@ A public operation is complete only when all of these agree:
 
 1. A stage and name consistent with `contexts/design/operations/naming.md`.
 2. Typed input and config models, when the operation has them, exported from
-   the canonical owning package (`quantmind.configs` for flow configs,
-   `quantmind.etl` for ETL run contracts, or another explicit owner).
+   the canonical owning package (`finsage.configs` for flow configs,
+   `finsage.etl` for ETL run contracts, or another explicit owner).
 3. One intent-oriented async function, small service class, or document-scoped
-   handle exported from its canonical owning package (`quantmind.flows`,
-   `quantmind.etl`, `quantmind.library`, etc.), with its result contract
+   handle exported from its canonical owning package (`finsage.flows`,
+   `finsage.etl`, `finsage.library`, etc.), with its result contract
    exported from the same owning layer.
 4. Offline success and failure tests for the public callable, plus a
    magic-introspection test when a function follows the `(input, *, cfg)`

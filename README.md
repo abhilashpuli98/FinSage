@@ -1,255 +1,212 @@
+# FinSage
 
-<p align="center">
-  <img src="assets/quantmind-wordmark.png" width="240">
-</p>
+FinSage is an open-source research codebase for building temporally aware, evidence-oriented financial knowledge workflows. It combines deterministic document processing and typed knowledge artifacts with LLM-assisted extraction, conflict analysis, retrieval, and evaluation experiments.
 
-<p align="center">
-  <img src="assets/quant-mind.png" width="400">
-</p>
+> **Research software in active development.** The repository contains working components and an aspirational system architecture. It does not yet implement every box in the diagram, and no benchmark result or effectiveness claim is made here.
 
-<p align="center">
-  <b>Transform Financial Knowledge into Actionable Intelligence</b>
-</p>
-<p align="center">
-  <a href="https://github.com/LLMQuant/quant-mind/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
-  </a>
-  <a href="https://python.org">
-    <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" alt="Python Version">
-  </a>
-</p>
-<p align="center">
-  <a href="#-knowledge-engineering">Knowledge Engineering</a> •
-  <a href="#-the-vision">The Vision</a> •
-  <a href="#-quick-start">Quick Start</a> •
-  <a href="#-evaluation-in-design">Evaluation</a> •
-  <a href="#-in-production-llmquant-data">In Production</a> •
-  <a href="#%EF%B8%8F-roadmap">Roadmap</a> •
-  <a href="#-contributing">Contributing</a>
-</p>
+Maintainer: [@abhilashpuli98](https://github.com/abhilashpuli98)
 
+## Overview
 
-QuantMind is an information processor for quantitative finance: it refines raw financial information — papers, news, filings — into structured financial knowledge that downstream retrieval and reasoning can trust. Every piece of knowledge is typed, keeps its citation, and knows its timestamp, so it persists and time-queries standalone.
+Financial research evidence is distributed across papers, news, filings, and other documents. A document-only search result can omit when a claim applies, whether sources disagree, or which passages support an answer. FinSage explores a knowledge-centric approach: represent source material as typed artifacts with provenance and time information, then retrieve and reason over those artifacts.
 
-The people who build these refinement flows are increasingly agents — coding agents, with humans behind them. So the repository is designed agent-oriented: you open the checkout, describe the pipeline you want, and an agent builds it here against the repo's contracts, skills, and deterministic verification. It is also a perfectly good importable Python library.
+The Python distribution and import namespace are both `finsage`. The codebase descends from the QuantMind project; its original MIT license and upstream attribution are retained. The migration changes project identity and import paths, not the research lineage.
 
-### 📰 News
-| 🗞️ News        | 📝 Description                                                                 |
-|----------------|-------------------------------------------------------------------------------|
-| 🛠️ 2026-07 | Rebuilding the repo **agent-native** — contexts, skills, hooks — so a coding agent can do QuantMind-quality work inside the checkout. |
-| 🎉 Accepted at NeurIPS 2025 Workshop | Our paper **[Quant-Mind](#)** has been accepted to the **[NeurIPS 2025 GenAI in Finance Workshop](https://sites.google.com/view/neurips-25-gen-ai-in-finance/home)** !🚀 |
-| 📢 First Release on GitHub  | **Quant-Mind** is now live on GitHub — please check it out and join us! 🤗 |
+## Research Motivation
 
+FinSage investigates three practical challenges in financial knowledge systems:
 
-### 🧩 Knowledge Engineering
+- **Time-sensitive evidence:** empirical findings and market claims have validity periods; point-in-time queries should not silently use later information.
+- **Disagreement across sources:** differing estimates or conclusions may reflect a genuine contradiction, different samples, or different methods. Preserve the evidence and resolution rationale rather than silently collapsing it.
+- **Reproducible, inspectable processing:** make source handling, model configuration, retrieval evidence, and evaluation procedures visible enough to test.
 
-**Any source → typed knowledge.**
+These are research motivations, not claims that FinSage already solves financial question answering or produces better results than existing systems.
 
-<p align="center"><img src="assets/v1-context-engineering.png" width="920" alt="any source through preprocess and flows into typed knowledge and applications"></p>
+## Architecture
 
-*The target surface — shipping today: `PaperFlow` · `collect_news`; see Roadmap.*
+The image is the target research architecture. Its storage, memory, graph, orchestration, verification, and integration boxes describe intended connections; implementation status is documented below.
 
-- **Deterministic preprocess** — `fetch` / parse / `format` + `clean` produce source-faithful values with no model in the loop, so provenance is exact and replayable.
-- **Config-driven operations** — `PaperFlow(cfg).build(input)` binds an immutable build config once and applies it per input; `collect_news` collects a replayable source window; `batch_run` fans any operation across a list of inputs. You never write `asyncio.gather` boilerplate.
-- **Typed knowledge shapes** — a `Paper` structure tree for whole documents, and flat cards for `News` / `Earnings` / `Factor` / `Thesis`. Every artifact is self-contained: it carries its own text, an `as_of` timestamp, and a light source ref, so it persists and time-queries standalone.
-- **Retrieval over that knowledge** — `rag/` (chunking + BM25 / similarity), `library/` (local persistence + meaning-based search), and `mind/` (agentic, reasoning-based retrieval). Together they serve RAG and Agentic RAG, deep research, and data-MCP serving.
+![FinSage System Architecture](architecture.png)
 
-This is the substance shipped as the NeurIPS 2025 GenAI-in-Finance workshop paper (**arXiv:2509.21507**). The always-current statement lives in [`contexts/design/positioning.md`](contexts/design/positioning.md).
+### Stage 1: Knowledge Extraction and Engineering
 
-### 🧠 The Vision
+The implemented path starts with supported inputs and turns them into typed values:
 
-**Harness engineering — any agent → domain specialist.**
+1. **Source ingestion:** the preprocessing layer includes arXiv, DOI, HTTP/local-file, and RSS acquisition paths; the public news operation currently supports PR Newswire.
+2. **Parsing and normalization:** PDF and HTML processing, page-aware parsed documents, text cleaning, outline signals, and time/date helpers are implemented. The diagram's generalized OCR and table-extraction service is not a single integrated capability.
+3. **Knowledge construction:** `PaperFlow` produces paper artifacts and structure trees; `collect_news` returns a replayable news batch; `TemporalPaperFlow` extracts temporal knowledge units (TKUs) from supported PDF paper inputs. Inputs and outputs use typed Pydantic models or frozen data classes according to their role.
+4. **Temporal representation:** a `TemporalKnowledgeUnit` records an atomic claim, source, validity bounds, confidence, domain, and tags. Helpers support validity checks and collections can be filtered by date or domain. Temporal extraction is LLM-assisted and its inferred dates/domain should be treated as fallible evidence, not ground truth.
+5. **Conflict analysis:** the conflict detector prefilters claims by source, domain, and overlapping validity windows, then uses embedding similarity and LLM confirmation. The resolver can record market, period, or methodology-based resolution and contextual synthesis. These are components, not an always-on global conflict service.
+6. **Persistence:** `LocalKnowledgeLibrary` stores supported canonical knowledge and paper artifacts in SQLite; it can persist and reopen self-contained structure trees. It builds local semantic-search projections using an embedding provider. There is no integrated cloud backup or separate graph database service.
 
-<p align="center"><img src="assets/v2-harness-engineering.png" width="920" alt="the quant-mind harness: context layer, code layer, workspace, deterministic verify, deliverables"></p>
+The current knowledge shapes include flat and tree artifacts. `GraphKnowledge` is a placeholder and cannot be subclassed; a persisted knowledge graph and graph traversal are planned, not implemented.
 
-> **Don't import it. Open it.**
+### Stage 2: Retrieval and Reasoning
 
-The repository itself is the product surface — we call this **harness engineering**. Its `AGENTS.md` / `CLAUDE.md` contracts, progressive-disclosure `contexts/`, portable skills, and Claude + Codex hooks, all gated by a deterministic verify, upgrade a general coding agent into one that reliably does QuantMind-quality work. The bet: **a weak model in a good harness beats a strong model running bare.**
+The current retrieval tools are separate operations, not one fully integrated multi-agent answer pipeline:
 
-- **Repo-level contracts** — `AGENTS.md` / `CLAUDE.md` state the always-on rules once, in one source, for every agent that opens the repo.
-- **Progressive-disclosure `contexts/`** — agent-facing pages with a Quick Summary / Contents preview, so an agent loads only the one page a task needs.
-- **Portable skills** — `quantmind-dev` ships today (contributor setup / commit / PR / component workflow), mirrored for Claude and Codex.
-- **Claude + Codex hooks** — shared hook scripts give both agents identical hard guarantees without maintaining two copies of a rule.
-- **Deterministic verify** — `scripts/verify.sh` runs lint + types + import boundaries + tests, fast-failing in a fixed order; CI runs the exact same script.
+- **Page-aware document retrieval:** `finsage.rag` chunks parsed pages with LlamaIndex and ranks chunks with BM25. Returned evidence retains page and layout provenance.
+- **Local semantic search:** `LocalKnowledgeLibrary.search()` searches library-owned text projections and returns typed hits that can be resolved to their stored artifacts. This is separate from document BM25 retrieval.
+- **Agentic structure retrieval:** `AgenticRetriever` uses the OpenAI Agents SDK to inspect one self-contained structure tree and select node evidence. Results include evidence content and citations; this is reasoning-based traversal, not graph search or a general query planner.
+- **LLM routing:** the knowledge-pipeline `LLMRouter` uses LiteLLM for generation, embeddings, fallback between configured Ollama and API tiers, and in-memory usage/cost estimates. The Agents SDK runtime used by agentic retrieval remains separate.
+- **Answer generation and verification:** evaluation code includes LLM-judge scoring, but there is no integrated user-facing answer generator with claim-level citation verification or a runtime hallucination guard.
 
-See [`contexts/dev/harness-engineering.md`](contexts/dev/harness-engineering.md) for the enforcement mechanics.
+Hybrid dense-plus-BM25 retrieval, cross-encoder reranking, knowledge-graph reasoning, general multi-agent orchestration, and explainable answer synthesis are target architecture items, not current end-to-end features.
 
+### Shared Memory and Integration
 
-### 🚀 Quick Start
+`BaseFlowCfg` currently exposes a `memory_dir` setting, but persistent conversation, user-profile, document, and feedback memory are not integrated. Likewise, the architecture's application scenarios (deep research, financial RAG, knowledge-graph QA, and MCP serving) are directions for integration, not claims of shipped services. Current reusable integration surfaces are Python APIs, command-line examples/scripts, local SQLite storage, OpenAI Agents SDK, LiteLLM, Ollama, and LlamaIndex components.
 
-#### The agent path (recommended)
+## Key Research Contributions
 
-QuantMind is meant to be opened, not imported. Point a coding agent at the checkout and describe the pipeline you want:
+The implementation provides testable foundations for the following research questions:
 
-```bash
-git clone https://github.com/LLMQuant/quant-mind.git
-cd quant-mind && claude      # or: codex
-```
+- Can explicit validity windows improve point-in-time retrieval and evaluation?
+- Can cross-source conflict detection preserve disagreements and make their context inspectable?
+- How do local/API model routing choices affect extraction quality, latency, and estimated cost?
+- How do typed, cited paper artifacts compare with simpler retrieval baselines?
 
-Then, in the agent session:
+The code provides models, operations, and evaluation scaffolding for these questions. Novelty and empirical value require controlled experiments and comparison with appropriate baselines; the presence of a component alone is not a research result.
 
-> "Build me a source-first paper artifact for arXiv 1706.03762, then persist it and search the summary."
+## Technology Stack
 
-The agent reads the repo's contracts (`AGENTS.md`), loads the relevant `contexts/` pages, writes the pipeline, and runs `scripts/verify.sh` before it hands the change back.
+| Area | Technologies and role |
+|---|---|
+| Runtime and schemas | Python 3.10+, Pydantic 2, frozen dataclasses |
+| Agent runtime | OpenAI Agents SDK for agentic structure retrieval |
+| Model routing | LiteLLM for knowledge-pipeline calls; Ollama and API model tiers |
+| Document processing | PyMuPDF, LiteParse, HTTPX, arXiv client, Trafilatura |
+| Retrieval and storage | LlamaIndex BM25, SQLite-backed `LocalKnowledgeLibrary`, configurable embeddings |
+| Evaluation | pandas, SciPy, pytest; evaluation models, runner, and judge-based scoring |
+| Development checks | Ruff, basedpyright, import-linter, pytest and pytest-cov |
 
-#### The library path
+`pyproject.toml` also declares spaCy, ChromaDB, NetworkX, BERTScore, and related dependencies. Their presence as dependencies does not mean FinSage currently provides an integrated NER pipeline, Chroma-backed vector database, graph database, or completed benchmark evaluation.
 
-QuantMind is still a normal Python package. We use [uv](https://github.com/astral-sh/uv) for package management.
+## Installation
+
+Requirements: Python 3.10 or later and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-uv venv && source .venv/bin/activate
-uv pip install -e .
+git clone https://github.com/abhilashpuli98/FinSage.git
+cd FinSage
+uv venv
 ```
 
-`PaperFlow` refines one arXiv PDF into a self-contained paper artifact. The cfg **type** selects the knowledge shape (`PaperStructureCfg` → `PaperStructureTree`, `PaperSemanticCfg` → `PaperSemanticResult`). Bind a `PaperStructureCfg` to build a source-native **structure tree** — a hierarchy of page-cited nodes:
+Activate the environment, then install the project and development tools:
+
+```powershell
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+uv pip install -e ".[dev]"
+```
+
+```bash
+# macOS / Linux
+source .venv/bin/activate
+uv pip install -e ".[dev]"
+```
+
+The optional `full` extra adds dependencies for optional document/model tooling declared in `pyproject.toml`: `uv pip install -e ".[dev,full]"`.
+
+## Configuration
+
+- **API models:** provide `OPENAI_API_KEY` through the process environment or your secret manager when using OpenAI-backed model calls. Never commit credentials or a populated `.env` file.
+- **Local models:** install and start Ollama separately, then configure `OllamaModelCfg` and `RouterCfg`. Defaults include `llama3.2` and `nomic-embed-text`; the router checks local availability and has configured fallback tiers.
+- **Paper extraction:** `TemporalPaperCfg` controls model choice, chunk length, TKU limit, and semantic deduplication threshold. `TemporalPaperFlow` accepts the supported typed paper inputs; its current PDF path does not support every input variant.
+- **Reproducible runs:** record the model/provider, configuration, source revision, and output directory for each experiment. Router cost values are estimates, not provider invoices.
+
+## Usage Examples
+
+These offline examples use mocks or inspect configuration and do not require API credentials:
+
+```bash
+python examples/mind/router.py
+python examples/mind/conflict.py
+python examples/flows/temporal_paper.py
+```
+
+The conflict example mocks model calls. The temporal-paper example uses its mocked demonstration path when `OPENAI_API_KEY` is not set. A live paper extraction requires network access to the source and a configured model provider.
+
+A minimal live temporal extraction follows the same API as [`examples/flows/temporal_paper.py`](examples/flows/temporal_paper.py):
 
 ```python
 import asyncio
 
-from quantmind.configs import PaperStructureCfg
-from quantmind.configs.paper import ArxivIdentifier
-from quantmind.flows import PaperFlow
+from finsage.configs import TemporalPaperCfg
+from finsage.configs.paper import ArxivIdentifier
+from finsage.flows import TemporalPaperFlow
 
 
 async def main() -> None:
-    flow = PaperFlow(PaperStructureCfg(model="gpt-5.6-luna"))
-    tree = await flow.build(ArxivIdentifier(id="1706.03762v7"))
-    print(tree.id, len(tree.nodes))
+    flow = TemporalPaperFlow(TemporalPaperCfg())
+    collection = await flow.build(ArxivIdentifier(id="1706.03762v7"))
+    print(f"Extracted {len(collection.tkus)} temporal claims")
 
 
 asyncio.run(main())
 ```
 
-Prefer the **semantic** shape — a page-aware chunk set plus one cited global summary you can embed and retrieve over? Bind a `PaperSemanticCfg` instead — same class, different cfg:
+Further working examples and public operation contracts are indexed in [`docs/README.md`](docs/README.md). Local semantic-library usage is documented in [`docs/library.md`](docs/library.md).
 
-```python
-import asyncio
+## Implementation Status
 
-from quantmind.configs import PaperSemanticCfg
-from quantmind.configs.paper import ArxivIdentifier
-from quantmind.flows import PaperFlow
+| Capability | Status in this checkout |
+|---|---|
+| Typed flat/tree knowledge and page-cited paper artifacts | Implemented and covered by tests |
+| arXiv, DOI, HTTP/local, RSS preprocessing; PR Newswire collection | Implemented for the documented inputs and source |
+| Page-aware PDF parsing, deterministic chunking, BM25 retrieval | Implemented components; not a single general-purpose pipeline |
+| SQLite local knowledge library and semantic projections | Implemented; semantic search uses a configured embedding provider |
+| Temporal knowledge models, date helpers, temporal paper extraction | Implemented; extraction is model-dependent and should be validated |
+| Conflict records, candidate filtering, similarity/LLM detection and resolution | Implemented components; no global persistent conflict graph |
+| LiteLLM routing with local/API tiers and usage estimates | Implemented for knowledge-pipeline calls |
+| Agentic retrieval over self-contained paper structure trees | Implemented using the OpenAI Agents SDK |
+| FinBench-50 construction/evaluation code and model quality-cost runner | Implemented as experimental scaffolding; benchmark data/results are not published here |
+| Cross-source knowledge graph, integrated hybrid retriever/reranker, persistent user memory, runtime answer verification, MCP service | Planned or not integrated |
 
+The distribution metadata and imports are `finsage`. The package rename does not add compatibility imports under `quantmind`.
 
-async def main() -> None:
-    flow = PaperFlow(PaperSemanticCfg(model="gpt-5.6-luna", chunk_size=512))
-    result = await flow.build(ArxivIdentifier(id="1706.03762v7"))
-    print(result.global_summary.summary)
-    print(result.source_revision.id, result.chunk_set.id)
+## Evaluation Methodology
 
+The evaluation package defines factual, analytical, and temporal question models; a benchmark constructor; six comparison-system implementations; judge-based answer scoring; cached result output; paired comparisons; and an LLM quality/cost runner. The intended comparisons include generic model answering, a basic retrieval baseline, an upstream-style baseline, temporal/conflict ablations, and a combined configuration.
 
-asyncio.run(main())
-```
+The current scoring code uses an LLM judge for factual and analytical answers. Its temporal score combines judged correctness, a target-year mention, and the presence of a temporal-scope field. The runner records latency and approximate costs; the statistical helper reports paired t-tests and Cohen's d. These implementation choices need calibration and protocol review before scientific use.
 
-#### Fan out a batch with `batch_run`
+The paper list and generated benchmark/results are not included as public evidence in this README. No score, performance improvement, or completed experiment is claimed. Before reporting results, publish or version the dataset and splits, document prompts and model versions, validate baseline implementations, define metrics in advance, and report uncertainty and failure cases. Evaluation commands and live component checks are catalogued in [`docs/README.md`](docs/README.md).
 
-```python
-import asyncio
-from datetime import datetime, timedelta, timezone
+## Research Contributions and Limitations
 
-from quantmind.configs import NewsCollectionCfg, NewsWindow
-from quantmind.flows import batch_run, collect_news
+FinSage's contribution at this stage is an open implementation surface for temporal knowledge extraction, conflict-aware analysis, configurable model routing, document retrieval, and repeatable evaluation experiments. The code is not an investment recommendation system and should not be used as an authoritative source of financial advice.
 
+Important limitations include model-generated extraction errors, heuristic date/domain inference, estimated model costs, limited supported source integrations, no implemented graph storage/reasoning, no integrated long-term memory, and no end-to-end claim-verification workflow. API model behavior and output can vary across providers and versions.
 
-async def main() -> None:
-    end = datetime.now(timezone.utc)
-    windows = [
-        NewsWindow(
-            source="pr-newswire",
-            start=end - timedelta(days=day + 1),
-            end=end - timedelta(days=day),
-        )
-        for day in range(3)
-    ]
-    result = await batch_run(
-        collect_news,
-        windows,
-        cfg=NewsCollectionCfg(retain_raw_html=False),
-        concurrency=3,
-        on_error="skip",
-        on_progress=lambda done, total: print(f"{done}/{total}"),
-    )
-    print(f"ok={result.success_count} failed={result.failure_count}")
+## Reproducibility
 
+For each experiment, retain the exact source identifiers/revisions and permitted source data, data split, FinSage commit, Python/dependency lock, model/provider identifiers, configuration, prompts, retrieval settings, random seeds where applicable, cached raw outputs, scoring procedure, latency/cost estimates, and failure records. Use the evaluation runner's output directory to keep generated results separate from source inputs. Check dataset licenses and provider terms before redistribution. No private datasets, API credentials, model weights, or generated benchmark result files are required to install and test the core repository.
 
-asyncio.run(main())
-```
+## Roadmap
 
-#### Resolve free-form intent with `magic`
+- Integrate temporal artifacts with storage and retrieval while preserving point-in-time semantics.
+- Publish a documented financial benchmark and validate its data, splits, annotation quality, and baselines.
+- Evaluate temporal/conflict components with controlled ablations and calibrated judges.
+- Investigate graph-shaped knowledge and relationship-aware retrieval.
+- Design explicit persistence and privacy policies before implementing cross-session memory.
+- Integrate answer generation with claim-level evidence verification and citation checks.
+- Measure local/cloud quality, latency, cost, and reproducibility on versioned tasks.
 
-```python
-import asyncio
+These are research directions; they are not current feature commitments or measured outcomes.
 
-from quantmind.flows import collect_news
-from quantmind.magic import resolve_magic_input
+## Contributing
 
+FinSage is maintained by [@abhilashpuli98](https://github.com/abhilashpuli98), and contributions are welcome. Start with [`CONTRIBUTING.md`](CONTRIBUTING.md), open an issue for a substantial design change, and submit a focused pull request from a fork. Keep the existing `finsage` package boundaries, include tests and a focused example for new behavior, and state what verification you ran. Do not include API keys, `.env` files, private datasets, model weights, or generated results. See [`AGENTS.md`](AGENTS.md) for repository architecture and [`docs/README.md`](docs/README.md) for the public operation catalog.
 
-async def main() -> None:
-    inp, cfg = await resolve_magic_input(
-        "Collect the last day of PR Newswire company news.",
-        target_flow=collect_news,
-    )
-    batch = await collect_news(inp, cfg=cfg)
-    print(f"documents={batch.success_count} complete={batch.complete}")
+## References
 
+- Original QuantMind project and research context: [arXiv:2509.21507](https://arxiv.org/abs/2509.21507). This citation is preserved as upstream attribution and is not a FinSage publication or experimental result.
+- [OpenAI Agents SDK](https://github.com/openai/openai-agents-python)
+- [LiteLLM](https://github.com/BerriAI/litellm)
+- [LlamaIndex](https://github.com/run-llama/llama_index)
+- [Ollama](https://ollama.com/)
 
-asyncio.run(main())
-```
+## License
 
-More examples live under [`examples/`](examples/); design contracts live under [`contexts/design/`](contexts/design/).
-
-### 🔬 Evaluation (In Design)
-
-> [!NOTE]
-> Evaluation is in the **design phase** — no results are claimed yet. Our framing follows Anthropic's [Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents).
-
-**quantmind-bench** measures the harness bet directly. Following the SWE-bench model, it runs **paired trials on the same model and the same task set**: once against a bare checkout, once against the QuantMind repo mounted with its contracts, contexts, skills, and hooks. The reported deltas are **cost-to-green, pass@1, pass^k across seeds, and wall-clock** — how much a good harness moves a fixed model. Run instrumentation (tokens / cost / duration / a verify oracle) already ships; the protocol that consumes it is being designed, and no numbers are published.
-
-A separate **llmquant-data-bench** will score knowledge quality (correctness, citation precision/recall, point-in-time correctness); it is likewise in design.
-
-### 🏭 In Production: LLMQuant Data
-
-LLMQuant Data is QuantMind in production. The hosted data platform runs extraction pipelines powered by QuantMind: QuantMind is the open engine, LLMQuant Data is the operated product on top of it. The dependency direction is one-way — `llmquant-data` imports `quantmind`, never the reverse.
-
-<p align="center"><img src="assets/llmquant-data-cards.png" width="860"></p>
-
-
-### 🗺️ Roadmap
-
-Directions we are actively pushing on (not yet shipped):
-
-- **More agent-native** — a `quantmind-best-practice` skill alongside the shipped `quantmind-dev`, and an agent-first contributing path.
-- **Broader coverage** — a SEC / filings collection flow and a prediction-market knowledge type, beyond today's papers and news.
-- **Evaluation** — land the `quantmind-bench` protocol and publish its first paired runs.
-
-Development is moving fast. If you need a source, a knowledge type, or a flow we do not have yet, [open an issue](https://github.com/LLMQuant/quant-mind/issues) — we welcome the request.
-
-
-### 🤝 Contributing
-
-Prefer manual steps? See [`.claude/skills/quantmind-dev/references/setup.md`](.claude/skills/quantmind-dev/references/setup.md).
-
-The fastest path is to let a coding agent drive. Inside the checkout, tell Claude Code:
-
-```text
-/quantmind-dev set me up as a contributor
-/quantmind-dev file an issue: <what you need>
-/quantmind-dev I want to contribute <your change>
-```
-
-Codex users say the same thing in words — the skill is mirrored under `.agents/skills/quantmind-dev/`, so both agents follow one workflow: contributor setup, filing an issue, and developing a change with tests, verification, commit, and PR.
-
-> [!IMPORTANT]
-> **For Contributors**: [CONTRIBUTING.md](CONTRIBUTING.md) covers the same setup for humans — environment, pre-commit hooks, coding standards, and testing. `scripts/verify.sh` is the single deterministic check; CI runs the exact same script.
-
-We welcome contributions of all forms, from bug reports to feature development. Open an [issue](https://github.com/LLMQuant/quant-mind/issues) to discuss significant changes before you start, and make sure `bash scripts/verify.sh` is green before you open a PR.
-
-### License
-
-QuantMind is released under the MIT License—see `LICENSE` for details.
-
-### ❤️ Acknowledgements
-
-- **arXiv** for providing open access to a world of research.
-- The **open-source community** for the tools and libraries that make this project possible.
-</content>
-</invoke>
+The source tree's [`LICENSE`](LICENSE) carries the inherited MIT text and original LLMQuant copyright notice. The personal repository's pre-existing initial commit contains a GPL-3.0 license file; that commit remains in history, and its intended scope is not determined by this README. Review [`LICENSES/README.md`](LICENSES/README.md) before making distribution or compatibility claims. Third-party components retain their own license terms.

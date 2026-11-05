@@ -1,6 +1,6 @@
 # Pull Request Workflow
 
-How to open and maintain a pull request against QuantMind.
+How to open and maintain a pull request against FinSage.
 
 ## Before Opening
 

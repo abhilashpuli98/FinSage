@@ -1,11 +1,11 @@
 ---
-name: quantmind-dev
-description: Contributor workflow for the QuantMind codebase. Covers contributor setup (environment + hooks), filing issues, commit format, pull request format, and component development across quantmind/ modules (etl, knowledge, configs, preprocess, rag, flows, mind, utils) with tests, examples, and verification. Use when setting up as a contributor, filing an issue, committing, opening a PR, or implementing/refactoring QuantMind code.
+name: finsage-dev
+description: Contributor workflow for the FinSage codebase. Covers contributor setup (environment + hooks), filing issues, commit format, pull request format, and component development across finsage/ modules (etl, knowledge, configs, preprocess, rag, flows, mind, utils) with tests, examples, and verification. Use when setting up as a contributor, filing an issue, committing, opening a PR, or implementing/refactoring FinSage code.
 ---
 
-# QuantMind Dev
+# FinSage Dev
 
-Development workflow for contributing to the QuantMind codebase.
+Development workflow for contributing to the FinSage codebase.
 
 ## Start Here
 
@@ -30,7 +30,7 @@ Development workflow for contributing to the QuantMind codebase.
   `references/setup.md` ("File an Issue" section)
 - Committing staged work → `references/commit.md`
 - Opening or updating a pull request → `references/pull-request.md`
-- Implementing or refactoring anything under `quantmind/` →
+- Implementing or refactoring anything under `finsage/` →
   `references/develop-components.md` (read it **before** writing code)
 - Adding or editing a page under `contexts/` → `references/write-contexts.md`
 
@@ -56,13 +56,13 @@ A feature task usually chains all three: develop → commit → pull request.
   explicitly authorizes it.
 - New features ship with a unit test and a focused example (see
   `references/develop-components.md`).
-- This skill is mirrored under `.agents/skills/quantmind-dev/` and
-  `.claude/skills/quantmind-dev/`; the copies are identical. When changing
+- This skill is mirrored under `.agents/skills/finsage-dev/` and
+  `.claude/skills/finsage-dev/`; the copies are identical. When changing
   the skill, update both in the same change.
 
 ## Boundaries
 
-- This skill is for contributing to QuantMind itself. It does not cover
-  using QuantMind as a library in your own project.
+- This skill is for contributing to FinSage itself. It does not cover
+  using FinSage as a library in your own project.
 - Product decisions (new modules, new dependencies, API redesigns) need an
   issue and maintainer discussion first; do not encode them here.

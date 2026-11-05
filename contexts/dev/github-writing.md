@@ -2,7 +2,7 @@
 
 ## Quick Summary
 
-- **Purpose**: Define how raw Markdown should be formatted in QuantMind GitHub issues, pull requests, discussions, and comments.
+- **Purpose**: Define how raw Markdown should be formatted in FinSage GitHub issues, pull requests, discussions, and comments.
 - **Read when**: Drafting or editing any text submitted to GitHub.
 - **Key rule**: Keep each paragraph, list item, checklist item, table row, and blockquote paragraph on one line in the raw Markdown.
 - **Required check**: Read the raw body back after writing and remove formatter-introduced hard wrapping without changing meaning.

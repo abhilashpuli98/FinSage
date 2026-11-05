@@ -3,8 +3,8 @@
 ## Quick Summary
 
 - **Purpose**: Define canonical paper source, chunk, summary, structure, citation, and locator models.
-- **Read when**: Changing `quantmind.knowledge.paper`, stable paper identities, artifact lineage, or paper search resolution.
-- **Status**: Implemented by `quantmind.knowledge.paper` and persisted by `quantmind.library`.
+- **Read when**: Changing `finsage.knowledge.paper`, stable paper identities, artifact lineage, or paper search resolution.
+- **Status**: Implemented by `finsage.knowledge.paper` and persisted by `finsage.library`.
 - **Core rule**: Source revisions are immutable anchors; derived artifacts are independently versioned and never own retrieval vectors.
 
 ## Contents
@@ -83,7 +83,7 @@ A `PaperCitation` identifies the exact chunk set, chunk, page, and optional verb
 
 ## Retrieval Boundary
 
-Canonical paper models do not implement `embedding_text()` and do not select retrieval text. `quantmind.library` projects:
+Canonical paper models do not implement `embedding_text()` and do not select retrieval text. `finsage.library` projects:
 
 - one text-embedding target for the global summary;
 - one text-embedding target per paper chunk;

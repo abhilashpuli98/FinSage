@@ -1,8 +1,8 @@
-# QuantMind Design
+# FinSage Design
 
 ## Quick Summary
 
-- **Purpose**: Find accepted designs for QuantMind packages and public operations.
+- **Purpose**: Find accepted designs for FinSage packages and public operations.
 - **Read when**: A task changes architecture, package responsibilities, public behavior, or a required validation rule.
 - **Load next**: Open only the domain design that matches the task, then read that page in full before implementation.
 - **Authority**: These pages explain agreed behavior. Each page lists any part that is not implemented yet.
@@ -12,13 +12,13 @@
 - [Design Index](#design-index)
 - [Organization Rules](#organization-rules)
 
-This directory records QuantMind engineering decisions. Use it to understand which package owns each step, how packages work together, and what behavior an implementation must preserve.
+This directory records FinSage engineering decisions. Use it to understand which package owns each step, how packages work together, and what behavior an implementation must preserve.
 
 ## Design Index
 
 | Domain | Design |
 |---|---|
-| Positioning | [What QuantMind is: workbench, V1/V2 bets, evaluation, production](positioning.md) |
+| Positioning | [FinSage implementation, research questions, and planned architecture](positioning.md) |
 | Flow | [Source-first paper flow](flow/paper.md) |
 | Knowledge | [Paper sources, artifacts, citations, and locators](knowledge/paper.md) |
 | Flow | [News collection](flow/news.md) |
@@ -40,4 +40,4 @@ This directory records QuantMind engineering decisions. Use it to understand whi
 - State whether a document describes current behavior, planned behavior, or both. List current gaps so readers can distinguish a plan from working code.
 - Write headings and summaries as an action plus a concrete object. Avoid unexplained project shorthand and define any necessary domain term when it first appears.
 - Use code and tests to check current behavior. Keep `docs/` focused on user-facing guides, examples, and catalogs; those pages may link here but must not maintain a second copy of a design.
-- Follow the [contexts authoring standard](../../.agents/skills/quantmind-dev/references/write-contexts.md) when adding or editing a page — required page structure, index registration, and Mermaid diagram guidance live there.
+- Follow the [contexts authoring standard](../../.agents/skills/finsage-dev/references/write-contexts.md) when adding or editing a page — required page structure, index registration, and Mermaid diagram guidance live there.

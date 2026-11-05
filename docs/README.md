@@ -1,6 +1,6 @@
-# QuantMind Component Catalog
+# FinSage Component Catalog
 
-This is the discovery index for QuantMind's public operations, supported
+This is the discovery index for FinSage's public operations, supported
 sources, examples, design documents, and verification commands. Source-specific
 acquisition mechanics remain internal unless they are intentionally documented
 as a public preprocessing primitive.
@@ -14,19 +14,19 @@ harness.
 
 | Operation | Import | Input and config | Result | Example | Design or guide |
 |---|---|---|---|---|---|
-| Observable whole-run ETL | `quantmind.etl.ETLPipeline` | Three async stage callables; `create_run(source, dry_run=..., config_summary=...)` | Single load result plus local `run.json` / `events.jsonl` with top-level `dry_run` | [Write a local artifact](../examples/etl/local_artifact.py) | [Observable ETL guide](etl.md) |
-| Observable micro-batch ETL | `quantmind.etl.BatchETLPipeline` | Async batch producer plus transform/load; `create_run(source, dry_run=..., total_batches=...)` | `BatchRunSummary` plus local batch run records with top-level `dry_run` | [Write batch local artifacts](../examples/etl/batch_local_artifacts.py) | [Observable ETL guide](etl.md) |
-| Source-first paper flow | `quantmind.flows.PaperFlow` | `PaperFlow(PaperSemanticCfg)`; `build()`: `PaperInput` | `PaperSemanticResult` | [Persist and search a paper](../examples/flows/paper.py) | [Paper flow design](../contexts/design/flow/paper.md) |
-| Paper structure build | `quantmind.flows.PaperFlow` | `PaperFlow(PaperStructureCfg)`; `build()`: `PaperInput` | `PaperStructureTree` (self-contained) | [Build and retrieve](../examples/mind/paper_structure_retrieval.py) | [Structure retrieval design](../contexts/design/mind/retrieval.md) |
-| Reasoning-based retrieval (agentic) | `quantmind.mind.AgenticRetriever` | `AgenticRetriever(RetrievalCfg)`; `retrieve()`: one `StructureTree` + question (no library) | `list[RetrievalEvidence]` | [Build and retrieve](../examples/mind/paper_structure_retrieval.py) | [Structure retrieval design](../contexts/design/mind/retrieval.md) |
-| News collection | `quantmind.flows.collect_news` | `NewsWindow`, `NewsCollectionCfg` | `NewsBatch` from `quantmind.preprocess` | [Collect news](../examples/flows/collect_news.py) | [News collection design](../contexts/design/flow/news.md) |
-| Bounded fan-out | `quantmind.flows.batch_run` | Operation inputs and shared config | `BatchResult` | [README usage](../README.md#-usage-examples) | API docstrings |
-| Local semantic search | `quantmind.library.LocalKnowledgeLibrary` | `BaseKnowledge` or `PaperSemanticResult`, `SemanticQuery` | `list[SemanticHit]` | [Library example](../examples/library/README.md) | [Library guide](library.md) |
-| Page-aware document RAG | `quantmind.rag.chunk_parsed_document`, `quantmind.rag.retrieve_parsed_document` | `ParsedDocument`, splitter config, and query | `tuple[ParsedDocumentHit, ...]` | [Paper RAG](../examples/rag/paper.py) | [Document RAG design](../contexts/design/rag/document.md) |
+| Observable whole-run ETL | `finsage.etl.ETLPipeline` | Three async stage callables; `create_run(source, dry_run=..., config_summary=...)` | Single load result plus local `run.json` / `events.jsonl` with top-level `dry_run` | [Write a local artifact](../examples/etl/local_artifact.py) | [Observable ETL guide](etl.md) |
+| Observable micro-batch ETL | `finsage.etl.BatchETLPipeline` | Async batch producer plus transform/load; `create_run(source, dry_run=..., total_batches=...)` | `BatchRunSummary` plus local batch run records with top-level `dry_run` | [Write batch local artifacts](../examples/etl/batch_local_artifacts.py) | [Observable ETL guide](etl.md) |
+| Source-first paper flow | `finsage.flows.PaperFlow` | `PaperFlow(PaperSemanticCfg)`; `build()`: `PaperInput` | `PaperSemanticResult` | [Persist and search a paper](../examples/flows/paper.py) | [Paper flow design](../contexts/design/flow/paper.md) |
+| Paper structure build | `finsage.flows.PaperFlow` | `PaperFlow(PaperStructureCfg)`; `build()`: `PaperInput` | `PaperStructureTree` (self-contained) | [Build and retrieve](../examples/mind/paper_structure_retrieval.py) | [Structure retrieval design](../contexts/design/mind/retrieval.md) |
+| Reasoning-based retrieval (agentic) | `finsage.mind.AgenticRetriever` | `AgenticRetriever(RetrievalCfg)`; `retrieve()`: one `StructureTree` + question (no library) | `list[RetrievalEvidence]` | [Build and retrieve](../examples/mind/paper_structure_retrieval.py) | [Structure retrieval design](../contexts/design/mind/retrieval.md) |
+| News collection | `finsage.flows.collect_news` | `NewsWindow`, `NewsCollectionCfg` | `NewsBatch` from `finsage.preprocess` | [Collect news](../examples/flows/collect_news.py) | [News collection design](../contexts/design/flow/news.md) |
+| Bounded fan-out | `finsage.flows.batch_run` | Operation inputs and shared config | `BatchResult` | [README usage](../README.md#usage-examples) | API docstrings |
+| Local semantic search | `finsage.library.LocalKnowledgeLibrary` | `BaseKnowledge` or `PaperSemanticResult`, `SemanticQuery` | `list[SemanticHit]` | [Library example](../examples/library/README.md) | [Library guide](library.md) |
+| Page-aware document RAG | `finsage.rag.chunk_parsed_document`, `finsage.rag.retrieve_parsed_document` | `ParsedDocument`, splitter config, and query | `tuple[ParsedDocumentHit, ...]` | [Paper RAG](../examples/rag/paper.py) | [Document RAG design](../contexts/design/rag/document.md) |
 
-Import observable ETL authoring primitives from `quantmind.etl`, public inputs
-and configs from `quantmind.configs`, flow operations and builders from
-`quantmind.flows`, and cognitive services from `quantmind.mind`. Import result
+Import observable ETL authoring primitives from `finsage.etl`, public inputs
+and configs from `finsage.configs`, flow operations and builders from
+`finsage.flows`, and cognitive services from `finsage.mind`. Import result
 contracts from the canonical layer shown in the catalog.
 
 ## Public-Network Sources
@@ -78,7 +78,7 @@ listed above; `.github/workflows/e2e.yml` owns those component jobs.
 
 ## Adding a Public Operation or Source
 
-Use the `quantmind-dev` component workflow. A public operation is not complete
+Use the `finsage-dev` component workflow. A public operation is not complete
 until its typed contract, package exports, offline tests, focused example,
 design or guide, and catalog row agree. A public-network source additionally
 needs mocked source tests plus a bounded live verifier and component job in

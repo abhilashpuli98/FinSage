@@ -4,7 +4,7 @@
 
 - **Purpose**: Define how the local library stores validated knowledge and source-first papers, then searches rebuildable projections.
 - **Read when**: Changing `LocalKnowledgeLibrary`, SQLite schema, semantic projections, filters, hit locators, or file ownership.
-- **Status**: Implemented by `quantmind.library` with SQLite schema version 4 and private LlamaIndex ranking.
+- **Status**: Implemented by `finsage.library` with SQLite schema version 4 and private LlamaIndex ranking.
 - **Core rule**: Canonical sources and artifacts are durable; projection text, vectors, and private indexes are rebuildable.
 - **User guide**: [`docs/library.md`](../../../docs/library.md)
 
@@ -44,10 +44,10 @@ The public types are `LocalKnowledgeLibrary`, `SemanticQuery`, `SemanticHit`, an
 
 | Owner | Responsibility |
 |---|---|
-| `quantmind.knowledge` | Define immutable canonical models; perform no I/O and choose no retrieval text. |
-| `quantmind.library` | Persist canonical values, own retrieval projections, maintain vectors, and resolve search evidence. |
-| [`quantmind.rag`](../rag/document.md) | Build page-aware chunks or transient document-local evidence without owning canonical persistence. |
-| `quantmind.flows` | Produce validated results and leave persistence explicit. |
+| `finsage.knowledge` | Define immutable canonical models; perform no I/O and choose no retrieval text. |
+| `finsage.library` | Persist canonical values, own retrieval projections, maintain vectors, and resolve search evidence. |
+| [`finsage.rag`](../rag/document.md) | Build page-aware chunks or transient document-local evidence without owning canonical persistence. |
+| `finsage.flows` | Produce validated results and leave persistence explicit. |
 | Caller | Choose database and temporary parser-artifact locations and manage application lifecycle. |
 
 For conventional `BaseKnowledge`, source references remain pointers and the caller retains external raw files. For `PaperSemanticResult`, the exact source PDF, screenshots, and extracted images are part of the durable source revision and are copied into the library transaction.
@@ -85,7 +85,7 @@ Putting an unchanged result is idempotent and reuses valid vectors. The same sou
 
 ## Search Projections
 
-Retrieval text selection lives in `quantmind.library._internal.retrieval_targets`, not canonical models.
+Retrieval text selection lives in `finsage.library._internal.retrieval_targets`, not canonical models.
 
 - Each supported flat knowledge item produces one whole-item projection.
 - Each `TreeKnowledge` produces one aggregate projection and one projection for every non-root node.
@@ -130,7 +130,7 @@ Reads fail closed when canonical hashes, counts, IDs, membership, lineage, sourc
 
 ## PageIndex Boundary
 
-The library is canonical storage plus collection-wide semantic search, not a vector database abstraction. `PaperStructureTree` is persisted as a zero-projection artifact, and a node locator resolves to content assembled directly from its cited canonical source pages. Reasoning-based retrieval is owned by `quantmind.mind`. See [Build and retrieve from a page-preserving structure tree](../mind/retrieval.md).
+The library is canonical storage plus collection-wide semantic search, not a vector database abstraction. `PaperStructureTree` is persisted as a zero-projection artifact, and a node locator resolves to content assembled directly from its cited canonical source pages. Reasoning-based retrieval is owned by `finsage.mind`. See [Build and retrieve from a page-preserving structure tree](../mind/retrieval.md).
 
 PageIndex-style retrieval is not required to use `LocalKnowledgeLibrary.search()` or private LlamaIndex vector ranking. Paper Flow V1 still returns chunks and a cited summary; structure construction and persistence are separate explicit operations. Building per-node projections is an explicit P2 step that will enable hybrid semantic-plus-agentic retrieval without a second index.
 

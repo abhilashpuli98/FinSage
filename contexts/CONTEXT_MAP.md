@@ -42,7 +42,7 @@ contexts/
 │   ├── github-writing.md       ← GitHub prose style (no hard-wrap)
 │   └── harness-engineering.md  ← enforcement layers, hooks, rules, alignment
 └── usage/
-    └── README.md               ← using QuantMind as a library
+    └── README.md               ← using FinSage as a library
 ```
 
 ## Where to Start
@@ -50,8 +50,8 @@ contexts/
 | I want to | Open |
 |---|---|
 | Understand the whole `contexts/` layout | the [Directory Map](#directory-map) above |
-| Understand what QuantMind is (positioning, V1/V2) | [`design/positioning.md`](design/positioning.md) |
+| Understand what FinSage is (positioning, V1/V2) | [`design/positioning.md`](design/positioning.md) |
 | Develop, fix, test, or review code | [`dev/README.md`](dev/README.md) |
-| Use QuantMind as a library | [`usage/README.md`](usage/README.md) |
+| Use FinSage as a library | [`usage/README.md`](usage/README.md) |
 | Read or change a design decision | [`design/README.md`](design/README.md) |
 | Add a hook, rule, or CI gate | [`dev/harness-engineering.md`](dev/harness-engineering.md) |

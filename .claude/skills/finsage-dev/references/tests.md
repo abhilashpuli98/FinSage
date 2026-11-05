@@ -1,4 +1,4 @@
-# Writing tests for QuantMind
+# Writing tests for FinSage
 
 The canonical test standard. Read this before adding or changing tests. It
 covers where tests live, why the default suite is offline, coverage, how live
@@ -25,9 +25,9 @@ behavior is verified, and the change→test obligations that keep coverage hones
 
 ## Coverage
 
-- `pytest --cov=quantmind --cov-fail-under=75` runs inside `scripts/verify.sh`.
+- `pytest --cov=finsage --cov-fail-under=75` runs inside `scripts/verify.sh`.
   New code must not lower branch coverage.
-- Coverage measures `quantmind/` only — `scripts/` and `tests/` are not
+- Coverage measures `finsage/` only — `scripts/` and `tests/` are not
   measured. Adding a test that only exists to raise a `scripts/` file's coverage
   is pointless (see the next section).
 

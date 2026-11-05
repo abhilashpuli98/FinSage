@@ -4,7 +4,7 @@
 
 - **Purpose**: Define how one exact PDF revision becomes a durable page-aware chunk set and a cited global summary.
 - **Read when**: Changing the paper build (`PaperFlow(PaperSemanticCfg).build`), paper inputs, summarization limits, citation validation, or the end-to-end paper verifier.
-- **Status**: Implemented by the config-bound `quantmind.flows.PaperFlow` — a `PaperSemanticCfg` selects this source-first shape — for PDF-backed arXiv, HTTP, and local inputs.
+- **Status**: Implemented by the config-bound `finsage.flows.PaperFlow` — a `PaperSemanticCfg` selects this source-first shape — for PDF-backed arXiv, HTTP, and local inputs.
 - **Core rule**: Preserve and validate the source revision and chunk set before any model-generated summary is accepted.
 - **Canonical models**: [Paper source and artifact design](../knowledge/paper.md).
 

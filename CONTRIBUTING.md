@@ -1,27 +1,23 @@
-# Contributing to QuantMind
+# Contributing to FinSage
 
-Thank you for contributing to QuantMind! This guide covers environment
-setup and the contribution process. The canonical development workflow
-(commit format, PR format, component development) lives in the
-`quantmind-dev` skill — `.claude/skills/quantmind-dev/SKILL.md` /
-`.agents/skills/quantmind-dev/SKILL.md` — and the repository-wide rules
-live in `AGENTS.md` / `CLAUDE.md`. If you develop with a coding agent, it
-will pick these up automatically.
+FinSage is maintained by [@abhilashpuli98](https://github.com/abhilashpuli98), and contributions are welcome. This guide covers environment setup and the contribution process. The canonical development workflow lives in the `finsage-dev` skill (`.claude/skills/finsage-dev/SKILL.md` and `.agents/skills/finsage-dev/SKILL.md`); repository-wide rules live in `AGENTS.md` and `CLAUDE.md`.
 
 ## 🚀 Quick Setup
 
-1. **Fork and clone** the repository
-2. **Set up environment**:
+1. Fork `https://github.com/abhilashpuli98/FinSage` and clone your fork.
+2. Set up an environment with Python 3.10+ and `uv`:
 
    ```bash
-   uv venv && source .venv/bin/activate
+  uv venv
    uv pip install -e ".[dev]"
    ```
+
+  Activate `.venv` first (`.venv\Scripts\Activate.ps1` in PowerShell, or `source .venv/bin/activate` on macOS/Linux).
 
 3. **Install pre-commit hooks**:
 
    ```bash
-   ./scripts/pre-commit-setup.sh
+  bash scripts/pre-commit-setup.sh
    ```
 
 ## ✅ Verification
@@ -66,7 +62,7 @@ pytest tests/<module>/
 
 ## 📝 Development Standards
 
-- **Architecture**: QuantMind is a domain library on top of the OpenAI
+- **Architecture**: FinSage is a domain library on top of the OpenAI
   Agents SDK — functions over classes, `Protocol` over ABC, no CLI, no
   agent-runtime rebuilding. See `AGENTS.md` / `CLAUDE.md` for the stable
   constraints and the module map.
@@ -87,7 +83,7 @@ pytest tests/<module>/
 
 ## 🔄 Pull Request Process
 
-1. **Create a feature branch** from `master`.
+1. Create a feature branch from `main` in your fork.
 2. **Follow Conventional Commits**: `type(scope): description`, in English.
 3. **Verify before submitting**: deterministic verification and every
    applicable live-network component smoke test must be green.
@@ -96,13 +92,11 @@ pytest tests/<module>/
 5. Keep PRs small and focused
    ([Google eng practices](https://google.github.io/eng-practices/review/developer/small-cls.html)).
 
-For significant changes (new modules, new dependencies, API redesigns),
-open an [issue](https://github.com/LLMQuant/quant-mind/issues) to discuss
-first.
+For significant changes (new modules, new dependencies, API redesigns), open an [issue](https://github.com/abhilashpuli98/FinSage/issues) before implementation. Keep pull requests focused and explain behavior changes, tests, and any provider or data requirements.
 
 ## ❓ Questions?
 
-- Check existing [issues](https://github.com/LLMQuant/quant-mind/issues)
+- Check existing [issues](https://github.com/abhilashpuli98/FinSage/issues)
 - Review architecture patterns in existing code
 - See `AGENTS.md` / `CLAUDE.md` for repository-wide rules
 

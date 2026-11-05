@@ -4,7 +4,7 @@
 
 - **Purpose**: Answer "how many tokens, how long, and how many LLM steps did one flow run take" by reading the traces the Agents SDK already emits — not by hand-rolling a second accounting path.
 - **Read when**: Adding usage/latency visibility to a flow, wiring a run-usage readout into a runbook or `batch_run`, or debugging why a flow's reported tokens or step count look wrong.
-- **Owner**: `quantmind/utils/usage.py` (`usage_scope`, `SpanCollector`, `RunUsage`, `UsageStep`). A leaf helper; every package and user runbook may import it.
+- **Owner**: `finsage/utils/usage.py` (`usage_scope`, `SpanCollector`, `RunUsage`, `UsageStep`). A leaf helper; every package and user runbook may import it.
 - **Status**: Planned — this page is the agreed design contract for the implementation, not yet-shipped behavior. It lists current gaps and the one open decision inline.
 - **Core rule**: Observe, never enforce. This reads the SDK's spans after the fact; it never counts tokens to change what a run does (no budget, no cost).
 
@@ -57,9 +57,9 @@ flowchart LR
 - The caller reads the result **after** the block, once spans have flushed:
 
   ```python
-  from quantmind.utils.usage import usage_scope
+  from finsage.utils.usage import usage_scope
 
-  with usage_scope("quantmind.paper") as u:
+  with usage_scope("finsage.paper") as u:
       tree = await PaperFlow(cfg).build(input)
 
   print(u.usage.total_tokens, u.usage.requests, u.usage.wall_seconds)
@@ -80,7 +80,7 @@ Per-step is deliberate: a lump `total_tokens=53k` cannot tell you the reducer dw
 
 ## Layer Boundary and Non-Enforcement
 
-- **Home is `utils` (a leaf).** Like `utils/structured_output.py`, this wraps an Agents SDK seam, depends on nothing else in `quantmind`, and is imported by `flows`, by user runbooks, and later by `mind` — without any package importing `flows`. The import-linter leaf contract on `utils` already guards this.
+- **Home is `utils` (a leaf).** Like `utils/structured_output.py`, this wraps an Agents SDK seam, depends on nothing else in `finsage`, and is imported by `flows`, by user runbooks, and later by `mind` — without any package importing `flows`. The import-linter leaf contract on `utils` already guards this.
 - **Observation only — no accountant.** This never inspects usage *during* a run to steer it, cap it, or price it. That keeps it clear of the incoherent middle in [orchestration](../operations/orchestration.md#principle-2-agentic-vs-deterministic-orchestration): a concurrency-safe token accountant bolted onto a run to make it behave is a sign the task wanted deterministic decomposition, not observability. Budgets and cost are separate features and are not designed here.
 
 ## Scope, Non-Goals, and Planned Work

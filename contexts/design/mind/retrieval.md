@@ -31,7 +31,7 @@
 
 Vector retrieval assumes the passage most similar to a query in embedding space is the most relevant one. For long, structured financial documents that assumption breaks: near-identical passages differ on a threshold or exception; fixed-size chunking fragments a table; a cross-reference such as "see Item 7A" shares no similarity with its target; and a stateless retriever cannot use prior reasoning to decide where to look.
 
-Reasoning-based retrieval reframes the problem as relevance classification over a document's real structure: an agent reads a tree of section titles and summaries, picks a branch, drills down, and reads leaf text with exact page provenance. `quantmind.knowledge` already records this as the purpose of `TreeKnowledge`, and embeddings there "act as a coarse pre-filter, never as a replacement for that reasoning."
+Reasoning-based retrieval reframes the problem as relevance classification over a document's real structure: an agent reads a tree of section titles and summaries, picks a branch, drills down, and reads leaf text with exact page provenance. `finsage.knowledge` already records this as the purpose of `TreeKnowledge`, and embeddings there "act as a coarse pre-filter, never as a replacement for that reasoning."
 
 The earlier build of this feature made the tree an *empty shell*: nodes stored only titles, summaries, and page citations, and leaf text was refilled at query time from the library via `resolve(locator)`. That coupled two things that should be independent — the tree artifact and the store — and made single-tree retrieval impossible without a library. This design removes that coupling.
 
@@ -39,7 +39,7 @@ The earlier build of this feature made the tree an *empty shell*: nodes stored o
 
 This feature is the worked example for the repository's altitude rule (see [operations/orchestration.md](../operations/orchestration.md)). Two layers, two jobs:
 
-- **Pipelines** (`quantmind.flows`) are finished, batteries-included workflows. A caller states an intent — "turn this paper into a structure tree" — and gets back a **complete, self-contained artifact**. A pipeline is pure processing: `input → artifact`. It does **not** bind a library, persist anything, or retrieve. Producing the artifact fully — including any embeddings it carries — is the pipeline's job.
+- **Pipelines** (`finsage.flows`) are finished, batteries-included workflows. A caller states an intent — "turn this paper into a structure tree" — and gets back a **complete, self-contained artifact**. A pipeline is pure processing: `input → artifact`. It does **not** bind a library, persist anything, or retrieve. Producing the artifact fully — including any embeddings it carries — is the pipeline's job.
 - **Components** (`knowledge`, `preprocess`, `rag`, `library`, `mind`) are the building blocks. A caller who wants only an intermediate (just the parsed source, just chunks) uses a component directly and wires it themselves. A half-finished intermediate is **not** promoted to a public pipeline.
 
 Persistence (`library`) and retrieval (`mind`) are **downstream** of a pipeline, not part of it. A structure tree returned by `PaperFlow(cfg).build(input)` is immediately usable; putting it in a library and retrieving from it are separate, optional steps a caller chooses.
@@ -75,13 +75,13 @@ flowchart TD
 
 | Owner | Responsibility |
 |---|---|
-| `quantmind.preprocess` | Emit deterministic outline signals (heading candidates, table-of-contents pages, printed-to-physical page offset) from a parsed document. No LLM calls. |
-| `quantmind.flows` (`PaperFlow`) | A **config-bound** flow: `PaperFlow(cfg)` binds the settings; `build(input)` fetches, parses, runs one draft-structuring agent, then calls the knowledge constructor and returns a **self-contained** `PaperStructureTree`. The cfg *type* selects the knowledge shape (`PaperStructureCfg` → tree today). No persistence, no retrieval, no library. |
-| `quantmind.knowledge` | Own the `StructureTree` structural base and the source-bound `PaperStructureTree` artifact. `from_draft` mints identity, resolves page citations, **and populates each node's `content` from the exact source pages**, then runs the integrity gate. The artifact is a complete value. |
-| `quantmind.library` | Dump a self-contained tree and load it back unchanged (`put` / `open_structure`). A tree is an **independent** artifact: its library need not contain a chunk set, and loading it never depends on refilling text from another artifact. |
-| `quantmind.mind` | `AgenticRetriever(cfg)` binds the strategy config; `retrieve(tree, question)` reasons over one explicit tree value and returns evidence values with content already in them. It does **not** take or bind a library. |
+| `finsage.preprocess` | Emit deterministic outline signals (heading candidates, table-of-contents pages, printed-to-physical page offset) from a parsed document. No LLM calls. |
+| `finsage.flows` (`PaperFlow`) | A **config-bound** flow: `PaperFlow(cfg)` binds the settings; `build(input)` fetches, parses, runs one draft-structuring agent, then calls the knowledge constructor and returns a **self-contained** `PaperStructureTree`. The cfg *type* selects the knowledge shape (`PaperStructureCfg` → tree today). No persistence, no retrieval, no library. |
+| `finsage.knowledge` | Own the `StructureTree` structural base and the source-bound `PaperStructureTree` artifact. `from_draft` mints identity, resolves page citations, **and populates each node's `content` from the exact source pages**, then runs the integrity gate. The artifact is a complete value. |
+| `finsage.library` | Dump a self-contained tree and load it back unchanged (`put` / `open_structure`). A tree is an **independent** artifact: its library need not contain a chunk set, and loading it never depends on refilling text from another artifact. |
+| `finsage.mind` | `AgenticRetriever(cfg)` binds the strategy config; `retrieve(tree, question)` reasons over one explicit tree value and returns evidence values with content already in them. It does **not** take or bind a library. |
 
-`quantmind.rag` is unchanged: deterministic chunking and BM25, no LLM, no PageIndex producer.
+`finsage.rag` is unchanged: deterministic chunking and BM25, no LLM, no PageIndex producer.
 
 ## Self-Contained Structure Tree
 
@@ -106,8 +106,8 @@ A future document type adds its own `StructureTree` subclass with its own source
 `PaperFlow` is a **config-bound** flow: you bind the settings once at construction, and `build(input)` applies them to each input. The cfg **type** selects which knowledge shape it produces — a paper projects into several knowledge shapes (tree / flatten / graph), and none is privileged over the others.
 
 ```python
-from quantmind.flows import PaperFlow, batch_run
-from quantmind.configs import PaperStructureCfg
+from finsage.flows import PaperFlow, batch_run
+from finsage.configs import PaperStructureCfg
 
 tree_flow = PaperFlow(PaperStructureCfg(model="gpt-5.6-luna"))   # bind cfg once
 tree = await tree_flow.build(input)                             # -> PaperStructureTree
@@ -121,7 +121,7 @@ Rules:
 - **Bind the config, not the input.** `PaperFlow(cfg)` stores the immutable cfg; `build(input)` takes only the operand. A batch therefore runs every input under one unified setting, and a config can never drift mid-run — a reproducibility requirement, not ergonomics.
 - **The cfg type picks the shape.** `PaperStructureCfg` → `PaperStructureTree` and `PaperSemanticCfg` → `PaperSemanticResult`, both reached through the same `build` seam. A later `PaperCardCfg` would add a further shape through that seam.
 - **Pure processing.** `build` fetches, parses, and structures, producing the complete self-contained artifact. It binds **no** library, persists nothing, and does not retrieve.
-- A caller who wants only the parsed source uses `quantmind.preprocess` directly; "parse only" is a component seam, not a public pipeline.
+- A caller who wants only the parsed source uses `finsage.preprocess` directly; "parse only" is a component seam, not a public pipeline.
 
 ## Persistence: Dump / Load Symmetry
 
@@ -145,8 +145,8 @@ tree2 = await library.open_structure(tree.id)    # load: identical value object
 Single-tree retrieval is a **pure value operation** over a self-contained tree. `AgenticRetriever(cfg)` binds the retrieval config; `retrieve(retrievable, question)` takes only the operand — a `Retrievable` (a `StructureTree` today; it widens within `knowledge` to other reasoning-able shapes such as a graph, never to a vector store):
 
 ```python
-from quantmind.mind import AgenticRetriever
-from quantmind.configs import RetrievalCfg
+from finsage.mind import AgenticRetriever
+from finsage.configs import RetrievalCfg
 
 retriever = AgenticRetriever(RetrievalCfg(model="gpt-5.6-luna"))
 evidence = await retriever.retrieve(tree, "What are the method and limitations?")
@@ -200,7 +200,7 @@ Hybrid retrieval — shortlist nodes by semantic search, then reason over the sh
 
 ## Boundaries and Import Contracts
 
-- `library` and `rag` must not import `quantmind.mind`.
+- `library` and `rag` must not import `finsage.mind`.
 - `mind` may import `knowledge`, `configs`, and `utils`. It **no longer needs to import `library`** for retrieval: single-tree `retrieve` is library-free. The existing `mind -> library` allowance may stay for the future collection path, but the retrieval operation must not depend on it.
 - `flows` is the apex and may import `knowledge`, `preprocess`, `rag`, `configs`, `mind`, and `utils`. `PaperFlow` imports no library.
 - Update the `import-linter` contracts if the `mind -> library` edge is dropped from the retrieval path; keep every other edge intact.
