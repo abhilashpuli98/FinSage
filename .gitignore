@@ -32,11 +32,12 @@ docs/superpowers/
 .coverage.*
 htmlcov/
 coverage.xml
+scripts/_assumption_data.json
 
 # macOS
 .DS_Store
 
 # Ephemeral local scratch (temp dirs, e2e harness output)
-.quant-mind/
+.finsage/
 temp/
 tmp/

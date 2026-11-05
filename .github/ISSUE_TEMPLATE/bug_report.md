@@ -1,6 +1,6 @@
 ---
 name: 🐛 Bug Report
-about: Report a bug to help us improve QuantMind
+about: Report a bug to help us improve FinSage
 title: 'bug: [brief description of the bug]'
 labels: ['type: bug']
 assignees: ''
@@ -28,7 +28,7 @@ assignees: ''
 
 ## 📋 Environment
 
-- **QuantMind Version**: <!-- e.g., v0.2.0 -->
+- **FinSage Version**: <!-- e.g., v0.2.0 -->
 - **Python Version**: <!-- e.g., 3.9.7 -->
 - **Operating System**: <!-- e.g., macOS 12.6, Ubuntu 22.04, Windows 11 -->
 - **Installation Method**: <!-- e.g., pip, uv, source -->
@@ -46,7 +46,7 @@ assignees: ''
 ### Configuration
 
 ```yaml
-# If relevant, paste your QuantMind configuration here
+# If relevant, paste your FinSage configuration here
 ```
 
 ## 🛠️ Possible Solution
